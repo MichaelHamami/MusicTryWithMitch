@@ -25,7 +25,7 @@ public class MediaBrowserHelper {
     private MediaControllerCompat mMediaController;
 
     private MediaBrowserConnectionCallback mMediaBrowserConnectionCallback;
-    private final MediaBrowserSubscriptionCallBack mMediaBrowserSubscriptionCallBack;
+    private MediaBrowserSubscriptionCallBack mMediaBrowserSubscriptionCallBack;
     private MediaControllerCallback mMediaControllerCallback;
     private MediaBrowserHelperCallback mMediaBrowserCallback;
     private boolean mWasConfigurationChanged;
@@ -43,21 +43,10 @@ public class MediaBrowserHelper {
 
     public void setMediaBrowserHelperCallback(MediaBrowserHelperCallback mediaBrowserHelperCallback)
     {
-       mMediaBrowserCallback = mediaBrowserHelperCallback;
+        mMediaBrowserCallback = mediaBrowserHelperCallback;
     }
     private class MediaControllerCallback extends MediaControllerCompat.Callback
     {
-        @Override
-        public void onPlaybackStateChanged(PlaybackStateCompat state) {
-            Log.d(TAG, "onPlaybackStateChanged: called.");
-
-            if(mMediaBrowserCallback != null)
-            {
-                mMediaBrowserCallback.onPlayBackStateChanged(state);
-            }
-
-        }
-
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata)
         {
@@ -68,11 +57,35 @@ public class MediaBrowserHelper {
                 mMediaBrowserCallback.onMetadataChanged(metadata);
             }
         }
+
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat state) {
+            Log.d(TAG, "onPlaybackStateChanged: called.");
+
+            if(mMediaBrowserCallback != null)
+            {
+                mMediaBrowserCallback.onPlayBackStateChanged(state);
+            }
+
+        }
+        // This might happen if the MusicService is killed while the Activity is in the
+        // foreground and onStart() has been called (but not onStop()).
+        @Override
+        public void onSessionDestroyed() {
+            onPlaybackStateChanged(null);
+        }
+
+
     }
 
-    public void subscribeToNewPlaylist(String playlistId)
-    {
-        mMediaBrowser.subscribe(playlistId,mMediaBrowserSubscriptionCallBack);
+    public void subscribeToNewPlaylist(String currentPlaylistId, String newPlaylistId){
+        if(!currentPlaylistId.equals("")){
+            Log.d(TAG, "subscribeToNewPlaylist:  unsubscribed ...");
+            mMediaBrowser.unsubscribe(currentPlaylistId);
+        }
+        Log.d(TAG, "subscribeToNewPlaylist: playlistId is: "+newPlaylistId +" and MediaBrowserSubscriptionCallBack is: " +mMediaBrowserSubscriptionCallBack);
+        Log.d(TAG, "subscribeToNewPlaylist: mMediaBrowser is : "+mMediaBrowser);
+        mMediaBrowser.subscribe(newPlaylistId,mMediaBrowserSubscriptionCallBack);
     }
     public void onStart(boolean wasConfigurationChanged)
     {
@@ -86,8 +99,8 @@ public class MediaBrowserHelper {
                     null);
 
             mMediaBrowser.connect();
-            Log.d(TAG,"onStart: connecting to the service");
         }
+        Log.d(TAG, "onStart: CALLED: Creating MediaBrowser, and connecting");
     }
     public void onStop()
     {
@@ -101,7 +114,7 @@ public class MediaBrowserHelper {
             mMediaBrowser.disconnect();
             mMediaBrowser = null;
         }
-        Log.d(TAG,"onStop: disconnecting from the service");
+        Log.d(TAG, "onStop: CALLED: Releasing MediaController, Disconnecting from MediaBrowser");
     }
 
     private class MediaBrowserConnectionCallback extends MediaBrowserCompat.ConnectionCallback{
@@ -136,16 +149,12 @@ public class MediaBrowserHelper {
         public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
             Log.d(TAG,"onChildrenLoaded: called: "+parentId + ", "+  children.toString()+", size:"+children.size());
 
-            if(!mWasConfigurationChanged)
-            {
+
                 for(final MediaBrowserCompat.MediaItem mediaItem : children)
                 {
                     Log.d(TAG,"onChildrenLoaded: CALLED: queue item:" + mediaItem.getMediaId());
                     mMediaController.addQueueItem(mediaItem.getDescription());
                 }
-            }
-
-
         }
     }
 

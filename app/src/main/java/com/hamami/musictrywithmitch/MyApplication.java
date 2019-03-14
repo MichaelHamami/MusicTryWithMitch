@@ -21,6 +21,7 @@ public class MyApplication extends Application {
     {
         if (mInstance == null)
         {
+            Log.d(TAG, "getInstance:  new instance of my application , so last playlist will removed");
             mInstance = new MyApplication();
         }
         return mInstance;

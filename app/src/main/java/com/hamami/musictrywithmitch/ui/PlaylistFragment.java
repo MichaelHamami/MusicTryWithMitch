@@ -59,7 +59,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 addToMediaList(songsList);
             }
             // only for now
-            playlistTitle = "jokeForNow";
+            playlistTitle = "jokeForNow2";
 
             setRetainInstance(true);
 
@@ -73,8 +73,8 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     {
         return inflater.inflate(R.layout.fragment_playlist,container,false);
     }
-    // called after onCreateView
 
+    // called after onCreateView
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
@@ -99,21 +99,29 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         }
     }
 
+    public int getSelectedIndex()
+    {
+       return mAdapter.getSelectedIndex();
+    }
+
     private void initRecyclerView(View view)
     {
             mRecyclerView = view.findViewById(R.id.reycler_view);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             mAdapter = new PlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
+            Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" and MediaList size is:" +mMediaList.size());
             mRecyclerView.setAdapter(mAdapter);
-            mAdapter.notifyDataSetChanged();
 
-//            songsList = retriveSongs();
-//            updateDataSet();
+            updateDataSet();
 
     }
 
     private void updateDataSet() {
         mAdapter.notifyDataSetChanged();
+        if(mIMainActivity.getMyPreferenceManager().getLastPlayedArtist().equals(playlistTitle)){
+            getSelectedMediaItem(mIMainActivity.getMyPreferenceManager().getLastPlayedMedia());
+        }
+
     }
 
     @Override
@@ -125,8 +133,8 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     @Override
     public void onMediaSelected(int position)
     {
-        Log.d(TAG, "onSongSelected: list item is clicked!");
-        mIMainActivity.getMyApplication().setMediaItems(mMediaList);
+        Log.d(TAG, "onSongSelected: list item is clicked! +List size is: "+mMediaList.size());
+        mIMainActivity.getMyApplicationInstance().setMediaItems(mMediaList);
         mSelectedMedia = mMediaList.get(position);
         mAdapter.setSelectedIndex(position);
         mIMainActivity.onMediaSelected(playlistTitle,mSelectedMedia,position);

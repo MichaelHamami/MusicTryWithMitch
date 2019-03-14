@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MusicTryWithMitch</string>
+    <string name="app_name">TheMusicApp</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="fragment_media_controller">MediaControllerFragment</string>

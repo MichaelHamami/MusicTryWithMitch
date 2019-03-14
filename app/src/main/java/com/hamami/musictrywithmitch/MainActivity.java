@@ -31,6 +31,7 @@ import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.QUEUE_NEW_PLAYLIST;
@@ -46,8 +47,11 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 0;
     private View mLayout;
 
-    public ArrayList<Song> songList = new ArrayList<>();
-      ArrayList<File> mySongs = new ArrayList<>();
+    ArrayList<Song> songList = new ArrayList<>();
+    ArrayList<File> mySongs = new ArrayList<>();
+    private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
+
+      // vars
 
       private MediaBrowserHelper mMediaBrowserHelper;
       private MyApplication mMyApplication;
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
       private SeekBarBroadcastReceiver mSeekBarBroadcastReceiver;
       private UpdateUIBroadcastReceiver mUpdateUIBroadcastReceiver;
       private boolean mOnAppOpen;
-      private boolean mWasConfigurationChanged;
+      private boolean mWasConfigurationChanged = false;
 
 
 
@@ -79,14 +83,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             );
             songList.add(song);
         }
+        addToMediaList(songList);
+
 
         mMyApplication = MyApplication.getInstance();
         mMyPrefManager = new MyPreferenceManager(this);
 
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
-        testPlaylistFragment();
-        Toast.makeText(this,"onCreateFine",Toast.LENGTH_LONG).show();
+
+
+
+        activePlaylistFragment();
+//        Toast.makeText(this,"onCreateFine",Toast.LENGTH_LONG).show();
 
     }
 
@@ -139,20 +148,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             {
                 Log.d(TAG, "playPause: we try to pause");
                 mMediaBrowserHelper.getTransportControls().pause();
-//                mIsPlaying = false;
             }
             else
             {
                 // play song
                 Log.d(TAG, "playPause: we call play song");
                 mMediaBrowserHelper.getTransportControls().play();
-//                mIsPlaying = true;
             }
         }
         else
         {
             if(!getMyPreferenceManager().getPlaylistId().equals(""))
             {
+                Log.d(TAG, "playPause: playlist is not null");
                 onMediaSelected(
                 getMyPreferenceManager().getPlaylistId(),
                         mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
@@ -161,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             }
             else
             {
+                Log.d(TAG, "playPause: selected something to play");
                 Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
             }
         }
@@ -168,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     }
 
     @Override
-    public MyApplication getMyApplication() {
+    public MyApplication getMyApplicationInstance() {
         return mMyApplication;
     }
 
@@ -180,69 +189,81 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             Log.d(TAG,"onMediaSelected: Called: "+mediaItem.getDescription().getMediaId());
 
             String currentPlaylistId = getMyPreferenceManager().getPlaylistId();
+            Log.d(TAG, "onMediaSelected: currentPlaylistId is: "+currentPlaylistId +"||| compare with playlistId: "+playlistId);
 
             Bundle bundle = new Bundle();
             bundle.putInt(MEDIA_QUEUE_POSITION,queuePosition);
 
-//            if(playlistId.equals(currentPlaylistId))
-//            {
-//                Log.d(TAG,"onMediaSelected: its same playlist: "+mediaItem.getDescription().getMediaId());
-//                mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
-//            }
-//            else
-       //     {
-                Log.d(TAG,"onMediaSelected: its new playlist: "+mediaItem.getDescription().getMediaId());
+            if(playlistId.equals(currentPlaylistId))
+            {
+                if(mMyApplication.getMediaItems().isEmpty())
+                {
+                    Log.d(TAG, "onMediaSelected:  the list in myApplication is empty so we subscribe again.");
+                    mMediaBrowserHelper.subscribeToNewPlaylist(currentPlaylistId,playlistId);
+                }
+
+                Log.d(TAG,"onMediaSelected: its same playlist and not empty: "+playlistId);
+                mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
+            }
+            else
+            {
+                Log.d(TAG,"onMediaSelected: its new playlist: "+playlistId);
                 bundle.putBoolean(QUEUE_NEW_PLAYLIST,true);
-                mMediaBrowserHelper.subscribeToNewPlaylist(playlistId);
+                mMediaBrowserHelper.subscribeToNewPlaylist(currentPlaylistId,playlistId);
                 mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
 
-       //     }
+            }
             mOnAppOpen = true;
         }
         else
         {
+            Log.d(TAG, "onMediaSelected: select something to play");
             Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public MyPreferenceManager getMyPreferenceManager() {
         return mMyPrefManager;
     }
 
+    
     @Override
     protected void onStart() {
         // when the app started
         super.onStart();
-//        mLayout = findViewById(R.id.main_layout);
-//
-//        showReadPreview();
+        // after the onCreateFinished
+//        mMediaBrowserHelper.onStart(mWasConfigurationChanged);
 
-//        mMediaBrowserHelper.onStart();
-        if(!getMyPreferenceManager().getPlaylistId().equals(""))
+        // we try this
+
+        if (!getMyPreferenceManager().getPlaylistId().equals(""))
         {
-//            preparedLastPlayedMedia();
+            preparedLastPlayedMedia();
+        }
+        else
+        {
             mMediaBrowserHelper.onStart(mWasConfigurationChanged);
         }
-        else {
-            mMediaBrowserHelper.onStart(mWasConfigurationChanged);
-        }
-
     }
 
     private void preparedLastPlayedMedia()
     {
-        // he get data from firebase to get last media
-        String lastMediaItemName = getMyPreferenceManager().getLastPlayedMedia();
-        Log.d(TAG, "preparedLastPlayedMedia: lastMediaItemName is: " + lastMediaItemName);
+        // he get data from firebase to get last media and all media.
 
-        MediaMetadataCompat mediaItem = new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,lastMediaItemName)
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE,lastMediaItemName)
-                //  need to get uri
-//                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+        for(int i = 0; i<songList.size(); i++)
+        {
+            if(mMediaList.get(i).getDescription().getMediaId().equals(getMyPreferenceManager().getLastPlayedMedia())){
+                getMediaControllerFragment().setMediaTitle(mMediaList.get(i));
+            }
+        }
+        onFinishedGettingPreviousSessionData(mMediaList);
 
-                .build();
+    }
+    private void onFinishedGettingPreviousSessionData(List<MediaMetadataCompat> mediaItems){
+        mMyApplication.setMediaItems(mediaItems);
+        mMediaBrowserHelper.onStart(mWasConfigurationChanged);
 
     }
 
@@ -253,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         mMediaBrowserHelper.onStop();
     }
 
-    private void testPlaylistFragment()
+    private void activePlaylistFragment()
     {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_container, PlaylistFragment.newInstance(songList)).commit();
@@ -387,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
                 .findFragmentByTag(getString(R.string.fragment_playlist));
         if (PlaylistFragment != null)
         {
+            Log.d(TAG, "getPlaylistFragment:  we get the playlistfragment");
             return PlaylistFragment;
         }
         return null;
@@ -467,6 +489,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
 
     }
 
-
+    private void addToMediaList(ArrayList<Song> songsList)
+    {
+        for (int i=0;i<songsList.size();i++)
+        {
+            MediaMetadataCompat media = new MediaMetadataCompat.Builder()
+                    // title = songName , artist=songTime
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
+//                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+                    .build();
+            mMediaList.add(media);
+        }
+    }
 
 }

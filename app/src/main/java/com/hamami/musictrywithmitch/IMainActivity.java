@@ -4,6 +4,8 @@ import android.support.v4.media.MediaMetadataCompat;
 
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
+import java.util.ArrayList;
+
 
 public interface IMainActivity {
 
@@ -12,7 +14,7 @@ public interface IMainActivity {
 
     void playPause();
 
-    MyApplication getMyApplication();
+    MyApplication getMyApplicationInstance();
 
     void onMediaSelected(String playlistId,MediaMetadataCompat mediaItem,int queuePosition);
 
