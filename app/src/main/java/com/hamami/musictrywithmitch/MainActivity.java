@@ -177,6 +177,64 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     }
 
     @Override
+    public void playNext()
+    {
+        Log.d(TAG, "playNext: called");
+        if(mOnAppOpen)
+        {
+                Log.d(TAG, "playNext: we try to skip to next");
+                mMediaBrowserHelper.getTransportControls().skipToNext();
+
+        }
+        else
+        {
+            if(!getMyPreferenceManager().getPlaylistId().equals(""))
+            {
+                Log.d(TAG, "playNext: playlist is not null");
+                onMediaSelected(
+                        getMyPreferenceManager().getPlaylistId(),
+                        mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
+                        getMyPreferenceManager().getQueuePosition()
+                );
+            }
+            else
+            {
+                Log.d(TAG, "playNext: selected something to play");
+                Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void playPrev()
+    {
+        Log.d(TAG, "playPrev: called");
+        if(mOnAppOpen)
+        {
+            Log.d(TAG, "playPrev: we try to skip to previous");
+            mMediaBrowserHelper.getTransportControls().skipToPrevious();
+
+        }
+        else
+        {
+            if(!getMyPreferenceManager().getPlaylistId().equals(""))
+            {
+                Log.d(TAG, "playPrev: playlist is not null");
+                onMediaSelected(
+                        getMyPreferenceManager().getPlaylistId(),
+                        mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
+                        getMyPreferenceManager().getQueuePosition()
+                );
+            }
+            else
+            {
+                Log.d(TAG, "playPrev: selected something to play");
+                Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
     public MyApplication getMyApplicationInstance() {
         return mMyApplication;
     }

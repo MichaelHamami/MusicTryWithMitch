@@ -14,6 +14,10 @@ public interface IMainActivity {
 
     void playPause();
 
+    void playNext();
+
+    void playPrev();
+
     MyApplication getMyApplicationInstance();
 
     void onMediaSelected(String playlistId,MediaMetadataCompat mediaItem,int queuePosition);
