@@ -1,16 +1,19 @@
 package com.hamami.musictrywithmitch.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.hamami.musictrywithmitch.IMainActivity;
-import com.hamami.musictrywithmitch.PlaylistRecyclerAdapter;
+import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.Song;
 
@@ -38,11 +41,12 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private IMainActivity mIMainActivity;
     private MediaMetadataCompat mSelectedMedia;
 
-    public static PlaylistFragment newInstance(ArrayList<Song> songsArray){
+    public static PlaylistFragment newInstance(ArrayList<Song> songsArray,String title){
         Log.d(TAG, "playListFragment new Instance called!");
         PlaylistFragment playlistFragment = new PlaylistFragment();
         Bundle args = new Bundle();
         args.putParcelableArrayList("songLists",songsArray);
+        args.putString("title",title);
         playlistFragment.setArguments(args);
         return playlistFragment;
     }
@@ -57,9 +61,10 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
                 songsList = getArguments().getParcelableArrayList("songLists");
                 addToMediaList(songsList);
+                playlistTitle = getArguments().getString("title");
             }
             // only for now
-            playlistTitle = "jokeForNow2";
+//            playlistTitle = "jokeForNow2";
 
             setRetainInstance(true);
 
@@ -141,11 +146,62 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         saveLastPlayedSongProperties();
 
     }
+
+    @Override
+    public void onSongOptionSelected(int position,View view)
+    {
+        Log.d(TAG, "onSongOptionSelected: you clicked on menu good job");
+        Toast.makeText(getContext(),"you clicked on menu good job",Toast.LENGTH_LONG).show();
+        showPopup(position,view);
+    }
+    public void showPopup(final int postion, View view){
+        PopupMenu popup = new PopupMenu(getContext(), view);
+        popup.inflate(R.menu.options_menu);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu1:
+                        Toast.makeText(getContext(), "play menu clicked", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "onMenuItemClick: play menu clicked ");
+                        onMediaSelected(postion);
+                        return true;
+                    case R.id.menu2:
+                        Log.d(TAG, "onMenuItemClick: delete menu  clicked ");
+                        Toast.makeText(getContext(), "delete menu  clicked", Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.menu3:
+                        Log.d(TAG, "onMenuItemClick: add to playlist menu clicked song:"+songsList.get(postion).getNameSong());
+                        mIMainActivity.onAddPlaylistMenuSelected(songsList.get(postion));
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        //displaying the popup
+        popup.show();
+    }
+
     public void updateUI(MediaMetadataCompat mediaItem)
     {
         mAdapter.setSelectedIndex(mAdapter.getIndexOfItem(mediaItem));
         mSelectedMedia = mediaItem;
         saveLastPlayedSongProperties();
+    }
+    public void addSongToList(Song song)
+    {
+        // need to check for duplicates
+        MediaMetadataCompat media = new MediaMetadataCompat.Builder()
+                // title = songName , songTime need to be changed
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,song.getNameSong())
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE,song.getNameSong())
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,song.getFileSong().toURI().toString())
+                .build();
+        mMediaList.add(media);
+        songsList.add(song);
+        updateDataSet();
     }
 
     private void addToMediaList(ArrayList<Song> songsList)

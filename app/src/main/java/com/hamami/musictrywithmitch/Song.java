@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.File;
+import java.util.Objects;
+
+import androidx.annotation.Nullable;
 
 public class Song implements Parcelable {
     private File fileSong;
@@ -55,5 +58,19 @@ public class Song implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(nameSong);
         dest.writeString(SongLength);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Song song = (Song) o;
+        return Objects.equals(fileSong, song.fileSong) &&
+                Objects.equals(nameSong, song.nameSong);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileSong, nameSong);
     }
 }

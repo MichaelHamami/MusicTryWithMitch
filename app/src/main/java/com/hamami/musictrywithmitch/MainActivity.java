@@ -3,6 +3,7 @@ package com.hamami.musictrywithmitch;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -22,6 +23,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
 import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelperCallback;
@@ -47,10 +50,16 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 0;
     private View mLayout;
 
+    // layout
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private ViewPagerAdapter viewPagerAdapter;
+
+    // Songs Vars
     ArrayList<Song> songList = new ArrayList<>();
     ArrayList<File> mySongs = new ArrayList<>();
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-
+    private Song songToAdd;
       // vars
 
       private MediaBrowserHelper mMediaBrowserHelper;
@@ -61,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
       private UpdateUIBroadcastReceiver mUpdateUIBroadcastReceiver;
       private boolean mOnAppOpen;
       private boolean mWasConfigurationChanged = false;
+      private boolean isNewPlaylist;
 
 
 
@@ -70,7 +80,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mLayout = findViewById(R.id.main_layout);
+        mTabLayout =  findViewById(R.id.tabLayout);
+        mViewPager = findViewById(R.id.main_container);
 
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         showReadPreview();
 
 //        songList = retriveSongs();
@@ -94,11 +107,34 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
 
 
 
-        activePlaylistFragment();
-//        Toast.makeText(this,"onCreateFine",Toast.LENGTH_LONG).show();
+//        activePlaylistFragment();
+        setupViewPager(mViewPager);
+        mTabLayout.setupWithViewPager(mViewPager);
+
+        ArrayList<Song> songList2 = new ArrayList<>();
+
+        for (int i = 0; i < mySongs.size()-1; i++) {
+            Song song = new Song(
+                    mySongs.get(i),
+                    mySongs.get(i).getName().replace(".mp3",""),
+                    getTimeSong(mySongs.get(i))
+            );
+            songList2.add(song);
+        }
+
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
+        viewPagerAdapter.notifyDataSetChanged();
 
     }
-
+    private void setupViewPager(ViewPager mViewPager) {
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
+        mViewPager.setAdapter(viewPagerAdapter);
+    }
+    private void activePlaylistFragment()
+    {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_container, PlaylistFragment.newInstance(songList,"AllMusic")).commit();
+    }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -280,6 +316,60 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         }
     }
 
+    @Override
+    public void onAddPlaylistMenuSelected(Song songSelected)
+    {
+        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().getAbsolutePath().toString());
+        Toast.makeText(this, "add to playlist menu clicked", Toast.LENGTH_SHORT).show();
+        songToAdd = songSelected;
+        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().getAbsolutePath().toString());
+        Intent intent = new Intent(this, SelectPlayList.class);
+//        intent.putExtra("selected_song",songSelected);
+        intent.putStringArrayListExtra("playlistTitles",viewPagerAdapter.getFragmentTitles());
+        // Pass tow argument intent and request code
+        startActivityForResult(intent,4);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==4){
+            Log.d(TAG, "onActivityResult: Called:");
+            // code here when they back
+            //Check if it is new playlist
+            isNewPlaylist = data.getBooleanExtra("isNewPlaylist",false);
+            Log.d(TAG, "onActivityResult: the Playlist is new?: " +isNewPlaylist);
+            if(isNewPlaylist == true)
+            {
+                String newPlaylist = data.getStringExtra("newPlaylist");
+                addNewPlaylist(newPlaylist,songToAdd);
+
+            }
+            // it is selected playlist from our list
+            else
+            {
+                String selectedPlaylist = data.getStringExtra("selectedPlaylist");
+                addSongToPlaylist(songToAdd,selectedPlaylist);
+            }
+
+        }
+    }
+
+    @Override
+    public void addSongToPlaylist(Song song, String playlist) {
+        Log.d(TAG, "addSongToPlaylist: Called");
+        Toast.makeText(this, "add the song bro", Toast.LENGTH_SHORT).show();
+//        viewPagerAdapter.getItemByTitle(playlist)
+    }
+
+    public void addNewPlaylist(String newPlaylist,Song song)
+    {
+        ArrayList<Song> songNewList = new ArrayList<>();
+        songNewList.add(song);
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
+        viewPagerAdapter.notifyDataSetChanged();
+    }
+
 
     @Override
     public MyPreferenceManager getMyPreferenceManager() {
@@ -290,18 +380,15 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     @Override
     protected void onStart() {
         // when the app started
+        Log.d(TAG, "onStart: Called");
         super.onStart();
-        // after the onCreateFinished
-//        mMediaBrowserHelper.onStart(mWasConfigurationChanged);
-
-        // we try this
-
         if (!getMyPreferenceManager().getPlaylistId().equals(""))
         {
             preparedLastPlayedMedia();
         }
         else
         {
+            Log.d(TAG, "onStart: else called will do MediaBrowser onStart");
             mMediaBrowserHelper.onStart(mWasConfigurationChanged);
         }
     }
@@ -309,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     private void preparedLastPlayedMedia()
     {
         // he get data from firebase to get last media and all media.
+        Log.d(TAG, "preparedLastPlayedMedia: Called");
 
         for(int i = 0; i<songList.size(); i++)
         {
@@ -331,14 +419,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         getMediaControllerFragment().getMediaSeekBar().disconnectController();
         mMediaBrowserHelper.onStop();
     }
-
-    private void activePlaylistFragment()
-    {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_container, PlaylistFragment.newInstance(songList)).commit();
-    }
-
-
 
     private ArrayList<Song> retriveSongs()
     {

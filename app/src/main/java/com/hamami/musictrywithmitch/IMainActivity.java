@@ -10,8 +10,6 @@ import java.util.ArrayList;
 public interface IMainActivity {
 
 
-//    void setActionBarTitle(String title);
-
     void playPause();
 
     void playNext();
@@ -21,6 +19,10 @@ public interface IMainActivity {
     MyApplication getMyApplicationInstance();
 
     void onMediaSelected(String playlistId,MediaMetadataCompat mediaItem,int queuePosition);
+
+    void onAddPlaylistMenuSelected(Song songSelected);
+
+    void addSongToPlaylist(Song song,String playlist);
 
     MyPreferenceManager getMyPreferenceManager();
 
