@@ -10,9 +10,7 @@ public class Constants {
     public static final String PLAYLIST_IDENTIFIER = "PLAYLIST_IDENTIFIER";
     public static final String EMPTY_MEDIA = "EMPTY_MEDIA";
     public static final String QUEUE_NEW_PLAYLIST = "QUEUE_NEW_PLAYLIST";
-    public static final String LAST_CATEGORY = "LAST_CATEGORY";
     public static final String LAST_ARTIST = "LAST_ARTIST";
-    public static final String LAST_ARTIST_IMAGE = "LAST_ARTIST_IMAGE";
     public static final String SEEK_BAR_MAX = "SEEK_BAR_MAX";
 
 

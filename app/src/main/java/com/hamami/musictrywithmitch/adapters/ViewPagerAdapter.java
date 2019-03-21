@@ -2,6 +2,8 @@ package com.hamami.musictrywithmitch.adapters;
 
 import android.util.Log;
 
+import com.hamami.musictrywithmitch.ui.PlaylistFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,18 +15,21 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     private static final String TAG = "ViewPagerAdapter";
 
-    private ArrayList<Fragment> mFragments = new ArrayList<>();
+    private ArrayList<PlaylistFragment> mFragments = new ArrayList<>();
     private ArrayList<String> mTitleTabs = new ArrayList<>();
 
-//    public ViewPagerAdapter(FragmentManager fm,ArrayList<Fragment> fragments,ArrayList<String> titleTabs) {
-    public ViewPagerAdapter(FragmentManager fm) {
 
+    public ViewPagerAdapter(FragmentManager fm) {
     super(fm);
-//        mFragments = fragments;
-//        mTitleTabs = titleTabs;
     }
 
-    public ArrayList<Fragment> getmFragments() {
+    public ViewPagerAdapter(FragmentManager fm,ArrayList<PlaylistFragment> fragments,ArrayList<String> titleTabs) {
+        super(fm);
+        mFragments = fragments;
+       mTitleTabs = titleTabs;
+    }
+
+    public ArrayList<PlaylistFragment> getFragments() {
         return mFragments;
     }
 
@@ -32,7 +37,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         return mTitleTabs;
     }
 
-    public void addFragment(Fragment fragment, String title)
+    public void addFragment(PlaylistFragment fragment, String title)
     {
         mFragments.add(fragment);
         mTitleTabs.add(title);

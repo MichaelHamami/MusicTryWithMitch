@@ -151,7 +151,6 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     public void onSongOptionSelected(int position,View view)
     {
         Log.d(TAG, "onSongOptionSelected: you clicked on menu good job");
-        Toast.makeText(getContext(),"you clicked on menu good job",Toast.LENGTH_LONG).show();
         showPopup(position,view);
     }
     public void showPopup(final int postion, View view){
@@ -162,19 +161,29 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.menu1:
+                    case R.id.playMenu:
                         Toast.makeText(getContext(), "play menu clicked", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "onMenuItemClick: play menu clicked ");
                         onMediaSelected(postion);
                         return true;
-                    case R.id.menu2:
+                    case R.id.deleteMenu:
                         Log.d(TAG, "onMenuItemClick: delete menu  clicked ");
                         Toast.makeText(getContext(), "delete menu  clicked", Toast.LENGTH_SHORT).show();
+                        deleteSongFromList(postion);
                         return true;
-                    case R.id.menu3:
+                    case R.id.addToPlaylistMenu:
                         Log.d(TAG, "onMenuItemClick: add to playlist menu clicked song:"+songsList.get(postion).getNameSong());
                         mIMainActivity.onAddPlaylistMenuSelected(songsList.get(postion));
                         return true;
+                    case R.id.addAsFavorite:
+                        Log.d(TAG, "onMenuItemClick: add to Favorite menu  clicked ");
+                        Toast.makeText(getContext(), "add to Favorite menu  clicked", Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.addToQueue:
+                        Log.d(TAG, "onMenuItemClick: Add to queue menu  clicked ");
+                        Toast.makeText(getContext(), "Add to queue menu  clicked", Toast.LENGTH_SHORT).show();
+                        return true;
+
                     default:
                         return false;
                 }
@@ -190,9 +199,18 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mSelectedMedia = mediaItem;
         saveLastPlayedSongProperties();
     }
-    public void addSongToList(Song song)
+    public  void addSongToList(Song song)
     {
-        // need to check for duplicates
+        // check for duplicates
+        for(int i=0; i<songsList.size();i++)
+        {
+            if(songsList.get(i).equals(song))
+            {
+                Toast.makeText(getContext(), "the song is already in the playlist ", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "addSongToList: the song is already in the playlist");
+                return;
+            }
+        }
         MediaMetadataCompat media = new MediaMetadataCompat.Builder()
                 // title = songName , songTime need to be changed
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,song.getNameSong())
@@ -201,6 +219,15 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 .build();
         mMediaList.add(media);
         songsList.add(song);
+        updateDataSet();
+    }
+    public  void deleteSongFromList(int position)
+    {
+        // need to be change just don't want to make crush
+        if(songsList.size() == 1) return;
+
+        songsList.remove(position);
+        mMediaList.remove(position);
         updateDataSet();
     }
 

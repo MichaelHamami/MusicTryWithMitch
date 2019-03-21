@@ -358,8 +358,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     @Override
     public void addSongToPlaylist(Song song, String playlist) {
         Log.d(TAG, "addSongToPlaylist: Called");
-        Toast.makeText(this, "add the song bro", Toast.LENGTH_SHORT).show();
-//        viewPagerAdapter.getItemByTitle(playlist)
+        ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlist))).addSongToList(song);
     }
 
     public void addNewPlaylist(String newPlaylist,Song song)

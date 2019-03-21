@@ -106,4 +106,17 @@ public class SelectPlayList extends AppCompatActivity implements SelectPlaylistR
 //        finish must be declared here to send the result to parent activity
         finish();
     }
+
+    @Override
+    public boolean isPlaylistExists(String playlist)
+    {
+        for(int i=0;i<fragmentsTitles.size();i++)
+        {
+            if(fragmentsTitles.get(i).equals(playlist))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
