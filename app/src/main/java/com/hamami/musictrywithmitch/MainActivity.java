@@ -41,14 +41,18 @@ import static com.hamami.musictrywithmitch.util.Constants.QUEUE_NEW_PLAYLIST;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_MAX;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_PROGRESS;
 
-public class MainActivity extends AppCompatActivity implements IMainActivity,ActivityCompat.OnRequestPermissionsResultCallback, MediaBrowserHelperCallback {
+public class MainActivity extends AppCompatActivity implements
+        IMainActivity,
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        MediaBrowserHelperCallback {
     // Tag for debug
     private static final String TAG = "MainActivity";
 
-
     // for permission
-    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 0;
-    private View mLayout;
+    private static final String[] STORAGE_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
 
     // layout
     private TabLayout mTabLayout;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     ArrayList<File> mySongs = new ArrayList<>();
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
     private Song songToAdd;
+
       // vars
 
       private MediaBrowserHelper mMediaBrowserHelper;
@@ -79,12 +84,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mLayout = findViewById(R.id.main_layout);
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        showReadPreview();
+
+        verifyPermissions();
 
 //        songList = retriveSongs();
         mySongs = findSongs(Environment.getExternalStorageDirectory());
@@ -105,9 +110,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
 
-
-
-//        activePlaylistFragment();
         setupViewPager(mViewPager);
         mTabLayout.setupWithViewPager(mViewPager);
 
@@ -126,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         viewPagerAdapter.notifyDataSetChanged();
 
     }
+
+
+
     private void setupViewPager(ViewPager mViewPager) {
         viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
         mViewPager.setAdapter(viewPagerAdapter);
@@ -477,68 +482,22 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         return time;
     }
 
-    private void requestReadPermission() {
-        // Permission has not been granted and must be requested.
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // Display a SnackBar with cda button to request the missing permission.
-            Snackbar.make(mLayout,"can you approve?" ,
-                    Snackbar.LENGTH_INDEFINITE).setAction("okey", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
-                }
-            }).show();
+    private void verifyPermissions(){
+        Log.d(TAG, "verifyPermissions: Checking Permissions.");
 
-        } else {
-            Snackbar.make(mLayout, "Read Storage unvailable", Snackbar.LENGTH_SHORT).show();
-            // Request the permission. The result will be received in onRequestPermissionResult().
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
-        }
-    } // checked
 
-    private void showReadPreview() {
-        // BEGIN_INCLUDE(startCamera)
-        // Check if the Camera permission has been granted
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Permission is already available, start camera preview
-//            Toast.makeText(this,"Granted checked",Toast.LENGTH_LONG).show();
-//            Toast.makeText(this,"Do Something",Toast.LENGTH_LONG).show();
-            mySongs = findSongs(Environment.getExternalStorageDirectory());
-        } else {
-            // Permission is missing and must be requested.
-            requestReadPermission();
+        int permissionExternalMemory = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionExternalMemory != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    STORAGE_PERMISSIONS,
+                    1
+            );
         }
-        // END_INCLUDE(startCamera)
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        // BEGIN_INCLUDE(onRequestPermissionsResult)
-        if (requestCode == PERMISSION_REQUEST_READ_EXTERNAL_STORAGE) {
-            // Request for camera permission.
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission has been granted. Start camera preview Activity.
-//                Toast.makeText(this,"Granted",Toast.LENGTH_LONG).show();
-//                Toast.makeText(this,"Do Something",Toast.LENGTH_LONG).show();
-                mySongs = findSongs(Environment.getExternalStorageDirectory());
 
-
-            } else {
-                // Permission request was denied.
-                Toast.makeText(this,"not approved",Toast.LENGTH_LONG).show();
-            }
-        }
-        // END_INCLUDE(onRequestPermissionsResult)
-    }
     private PlaylistFragment getPlaylistFragment()
     {
         PlaylistFragment PlaylistFragment = (PlaylistFragment)getSupportFragmentManager()
