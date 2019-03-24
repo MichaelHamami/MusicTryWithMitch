@@ -7,6 +7,7 @@ import com.hamami.musictrywithmitch.async.DeleteAsyncTask;
 import com.hamami.musictrywithmitch.async.InsertAsyncTask;
 import com.hamami.musictrywithmitch.async.UpdateAsyncTask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -31,6 +32,11 @@ public class PlaylistRepository {
     public LiveData<List<Playlist>> retrievePlaylistsTask()
     {
         return mPlaylistDatabase.getPlaylistDao().getPlaylists();
+    }
+
+    public List<Playlist> getPlaylistAsArrayList()
+    {
+        return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
     }
 
     public void deletePlaylist(Playlist playlist)

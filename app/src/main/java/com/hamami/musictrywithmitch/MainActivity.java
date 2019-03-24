@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
-        button = findViewById(R.id.updateFromDatabaseButton);
+//        button = findViewById(R.id.updateFromDatabaseButton);
 
         mPlaylists = new ArrayList<>();
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -106,23 +106,6 @@ public class MainActivity extends AppCompatActivity implements
 
         verifyPermissions();
 
-        getPlaylistFromDatabase();
-
-//        songList = retriveSongs();
-        mySongs = findSongs(Environment.getExternalStorageDirectory());
-        for (int i = 0; i < mySongs.size(); i++) {
-            Songs song = new Songs(
-                    mySongs.get(i).getAbsolutePath(),
-                    mySongs.get(i).getName().replace(".mp3",""),
-                    getTimeSong(mySongs.get(i))
-            );
-            songList.add(song);
-        }
-        addToMediaList(songList);
-//        Playlist check1 = new Playlist("Title1",songList);
-
-
-
 
         mMyApplication = MyApplication.getInstance();
         mMyPrefManager = new MyPreferenceManager(this);
@@ -130,40 +113,42 @@ public class MainActivity extends AppCompatActivity implements
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
 
-        setupViewPager(mViewPager);
-        mTabLayout.setupWithViewPager(mViewPager);
+        getPlaylistFromDatabase();
+
+//        setupViewPager(mViewPager);
+//        mTabLayout.setupWithViewPager(mViewPager);
 
 //        ArrayList<Song> songList2 = new ArrayList<>();
-        ArrayList<Songs> songList2 = new ArrayList<>();
+//        ArrayList<Songs> songList2 = new ArrayList<>();
 
 
-        for (int i = 0; i < mySongs.size()-1; i++) {
-            Songs song = new Songs(
-                    mySongs.get(i).getAbsolutePath(),
-                    mySongs.get(i).getName().replace(".mp3",""),
-                    getTimeSong(mySongs.get(i))
-            );
-            songList2.add(song);
-        }
+//        for (int i = 0; i < mySongs.size()-1; i++) {
+//            Songs song = new Songs(
+//                    mySongs.get(i).getAbsolutePath(),
+//                    mySongs.get(i).getName().replace(".mp3",""),
+//                    getTimeSong(mySongs.get(i))
+//            );
+//            songList2.add(song);
+//        }
 
 //        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
 //        viewPagerAdapter.notifyDataSetChanged();
 
         // get from repository
 
-        Log.d(TAG, "onCreate: We trying geting information database");
+//        Log.d(TAG, "onCreate: We trying geting information database");
 //        getPlaylistFromDatabase();
 
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                Log.d(TAG, "onClickButton: We trying geting information database after on Click");
-                getPlaylistFromDatabase();
-                addFromTabDatabase();
-            }
-        });
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                Log.d(TAG, "onClickButton: We trying geting information database after on Click");
+//                getPlaylistFromDatabase();
+//                addFromTabDatabase();
+//            }
+//        });
 
 
 
@@ -171,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void  getPlaylistFromDatabase()
     {
+        mPlaylists.addAll(mPlaylistRepository.getPlaylistAsArrayList());
         mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
             @Override
             public void onChanged(List<Playlist> playlists)
@@ -187,34 +173,19 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
+        setupViewPager(mViewPager);
+        mTabLayout.setupWithViewPager(mViewPager);
     }
 
     public void addFromTabDatabase()
     {
-        String titleList1 = mPlaylists.get(0).getTitle();
-        ArrayList<Songs> songsFromDatabase1 = mPlaylists.get(0).getSongs();
+//        String titleList1 = mPlaylists.get(0).getTitle();
+//        ArrayList<Songs> songsFromDatabase1 = mPlaylists.get(0).getSongs();
 
-        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songsFromDatabase1,"FromDataBase1"),"FromDataBase1");
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songsFromDatabase1,"FromDataBase1"),"FromDataBase1");
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(0)),"FromDataBase1");
         viewPagerAdapter.notifyDataSetChanged();
     }
-//    private void retrievePlaylist()
-//    {
-//        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
-//            @Override
-//            public void onChanged(List<Playlist> playlists)
-//            {
-//                if(mPlaylists.size() > 0)
-//                {
-//                    mPlaylists.clear();
-//                }
-//                if(playlists != null)
-//                {
-//                    mPlaylists.addAll(playlists);
-//                }
-//                // update the recyclerAdapter at least in his video
-//            }
-//        });
-//    }
 
 
     private void saveNewPlaylist()
@@ -223,13 +194,23 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setupViewPager(ViewPager mViewPager) {
-        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("AllMusic",songList)),"AllMusic");
+        if(mPlaylists.size() != 0)
+        {
+            Log.d(TAG, "setupViewPager: We get playlist's  from Database");
+            for(int i = 0; i < mPlaylists.size();i++)
+            {
+                viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i)),mPlaylists.get(i).getTitle());
+            }
+        }
+        else
+        {
+            Log.d(TAG, "setupViewPager: We get playlist from Storage");
+            Playlist playlistFromStorage = retrivePlaylistFromStorage();
+            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(playlistFromStorage),playlistFromStorage.getTitle());
+        }
         mViewPager.setAdapter(viewPagerAdapter);
-    }
-    private void activePlaylistFragment()
-    {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_container, PlaylistFragment.newInstance(songList,"AllMusic")).commit();
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -463,7 +444,8 @@ public class MainActivity extends AppCompatActivity implements
     {
         ArrayList<Songs> songNewList = new ArrayList<>();
         songNewList.add(song);
-        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist(newPlaylist,songNewList)),newPlaylist);
         viewPagerAdapter.notifyDataSetChanged();
     }
 
@@ -517,20 +499,21 @@ public class MainActivity extends AppCompatActivity implements
         mMediaBrowserHelper.onStop();
     }
 
-    private ArrayList<Song> retriveSongs()
+    private Playlist retrivePlaylistFromStorage()
     {
         ArrayList<File> songsFiles = new ArrayList<>();
         songsFiles =  findSongs(Environment.getExternalStorageDirectory());
-        ArrayList<Song> songsList = new ArrayList<>();
+        ArrayList<Songs> songsList = new ArrayList<>();
         for (int i = 0; i < songsFiles.size(); i++) {
-            Song song = new Song(
-                    songsFiles.get(i),
+            Songs song = new Songs(
+                    songsFiles.get(i).getAbsolutePath(),
                     songsFiles.get(i).getName().replaceAll(" .mp3"," "),
                     getTimeSong(songsFiles.get(i))
             );
             songsList.add(song);
         }
-        return songsList;
+        Playlist playlist = new Playlist("AllMusic",songsList);
+        return playlist;
     }
 
 

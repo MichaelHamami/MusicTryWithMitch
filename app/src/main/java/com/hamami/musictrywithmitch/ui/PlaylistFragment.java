@@ -49,12 +49,13 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     // Repository
     private PlaylistRepository mPlaylistRepository;
 
-    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
-        Log.d(TAG, "playListFragment new Instance called!");
+//    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
+public static PlaylistFragment newInstance(Playlist playlist){
+    Log.d(TAG, "playListFragment new Instance called!");
         PlaylistFragment playlistFragment = new PlaylistFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList("songLists",songsArray);
-        args.putString("title",title);
+        args.putParcelableArrayList("songLists",playlist.getSongs());
+        args.putString("title",playlist.getTitle());
         playlistFragment.setArguments(args);
         return playlistFragment;
     }
@@ -71,7 +72,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 songsList = getArguments().getParcelableArrayList("songLists");
                 addToMediaList(songsList);
                 mPlaylistTitle = getArguments().getString("title");
-                savePlaylistToDatabase();
+//                savePlaylistToDatabase();
             }
 
             // try get Songs from data base sql

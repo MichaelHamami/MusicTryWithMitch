@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">TheMusicApp</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+     <!--TODO: Remove or change this placeholder text -->
     <string name="fragment_media_controller">MediaControllerFragment</string>
     <string name="fragment_home">HomeFragment</string>
     <string name="fragment_category">CategoryFragment</string>

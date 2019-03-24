@@ -2,6 +2,7 @@ package com.hamami.musictrywithmitch.persistence;
 
 import com.hamami.musictrywithmitch.Models.Playlist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -19,6 +20,9 @@ public interface PlaylistDao {
 
     @Query("SELECT * FROM playlists")
     LiveData<List<Playlist>> getPlaylists();
+
+    @Query("SELECT * FROM playlists")
+    List<Playlist> getPlaylistsAsArrayList();
 
     @Query("SELECT * FROM playlists WHERE title LIKE :title")
     List<Playlist> getSpecificPlaylist(String title);
