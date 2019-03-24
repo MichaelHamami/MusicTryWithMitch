@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Song;
+import com.hamami.musictrywithmitch.Models.Song;
 
 import java.util.ArrayList;
 
@@ -23,12 +24,12 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private static final String TAG = "PlaylistRecyclerAdapter";
 
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Song> songsList = new ArrayList<>();
+    private ArrayList<Songs> songsList = new ArrayList<>();
     private Context mContext;
     private IMediaSelector mIMediaSelector;
     private int mSelectedIndex;
 
-    public PlaylistRecyclerAdapter(Context context, ArrayList<Song> songsList, ArrayList<MediaMetadataCompat> mMediaList,IMediaSelector mediaSelector)
+    public PlaylistRecyclerAdapter(Context context, ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mMediaList,IMediaSelector mediaSelector)
     {
         Log.d(TAG, "PlaylistRecyclerAdapter: called.");
         this.mMediaList = mMediaList;

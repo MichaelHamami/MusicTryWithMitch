@@ -1,7 +1,6 @@
 package com.hamami.musictrywithmitch.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
@@ -13,15 +12,21 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.hamami.musictrywithmitch.IMainActivity;
+import com.hamami.musictrywithmitch.Models.Playlist;
+import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Song;
+import com.hamami.musictrywithmitch.Models.Song;
+import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,11 +42,11 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private String playlistTitle;
     private PlaylistRecyclerAdapter mAdapter;
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Song> songsList = new ArrayList<>();
+    private ArrayList<Songs> songsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
     private MediaMetadataCompat mSelectedMedia;
 
-    public static PlaylistFragment newInstance(ArrayList<Song> songsArray,String title){
+    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
         Log.d(TAG, "playListFragment new Instance called!");
         PlaylistFragment playlistFragment = new PlaylistFragment();
         Bundle args = new Bundle();
@@ -63,6 +68,9 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 addToMediaList(songsList);
                 playlistTitle = getArguments().getString("title");
             }
+
+            // try get Songs from data base sql
+
             // only for now
 //            playlistTitle = "jokeForNow2";
 
@@ -199,7 +207,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mSelectedMedia = mediaItem;
         saveLastPlayedSongProperties();
     }
-    public  void addSongToList(Song song)
+    public  void addSongToList(Songs song)
     {
         // check for duplicates
         for(int i=0; i<songsList.size();i++)
@@ -211,11 +219,14 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 return;
             }
         }
+        File file = new File(song.getFileSong());
+
         MediaMetadataCompat media = new MediaMetadataCompat.Builder()
                 // title = songName , songTime need to be changed
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,song.getNameSong())
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE,song.getNameSong())
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,song.getFileSong().toURI().toString())
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
+//                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,song.getFileSong().toURI().toString())
                 .build();
         mMediaList.add(media);
         songsList.add(song);
@@ -231,16 +242,18 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         updateDataSet();
     }
 
-    private void addToMediaList(ArrayList<Song> songsList)
+    private void addToMediaList(ArrayList<Songs> songsList)
     {
         for (int i=0;i<songsList.size();i++)
         {
+            File file = new File(songsList.get(i).getFileSong());
             MediaMetadataCompat media = new MediaMetadataCompat.Builder()
                     // title = songName , artist=songTime
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
 //                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
+//                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
                     .build();
             mMediaList.add(media);
         }
@@ -258,5 +271,10 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("selected_index",mAdapter.getSelectedIndex());
+    }
+
+    private  void getPlaylistFromDatabase()
+    {
+
     }
 }

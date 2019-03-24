@@ -2,9 +2,9 @@ package com.hamami.musictrywithmitch;
 
 import android.support.v4.media.MediaMetadataCompat;
 
+import com.hamami.musictrywithmitch.Models.Song;
+import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
-
-import java.util.ArrayList;
 
 
 public interface IMainActivity {
@@ -20,9 +20,9 @@ public interface IMainActivity {
 
     void onMediaSelected(String playlistId,MediaMetadataCompat mediaItem,int queuePosition);
 
-    void onAddPlaylistMenuSelected(Song songSelected);
+    void onAddPlaylistMenuSelected(Songs songSelected);
 
-    void addSongToPlaylist(Song song,String playlist);
+    void addSongToPlaylist(Songs song,String playlist);
 
     MyPreferenceManager getMyPreferenceManager();
 

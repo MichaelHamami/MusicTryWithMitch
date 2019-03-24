@@ -1,12 +1,10 @@
-package com.hamami.musictrywithmitch;
+package com.hamami.musictrywithmitch.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.File;
 import java.util.Objects;
-
-import androidx.annotation.Nullable;
 
 public class Song implements Parcelable {
     private File fileSong;

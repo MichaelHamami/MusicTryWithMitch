@@ -1,8 +1,8 @@
 package com.hamami.musictrywithmitch;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
@@ -19,12 +19,14 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.hamami.musictrywithmitch.Models.Playlist;
+import com.hamami.musictrywithmitch.Models.Song;
+import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
+import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelperCallback;
@@ -60,10 +62,14 @@ public class MainActivity extends AppCompatActivity implements
     private ViewPagerAdapter viewPagerAdapter;
 
     // Songs Vars
-    ArrayList<Song> songList = new ArrayList<>();
+//    ArrayList<Song> songList = new ArrayList<>();
+    ArrayList<Songs> songList = new ArrayList<>();
+
     ArrayList<File> mySongs = new ArrayList<>();
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private Song songToAdd;
+    private Songs songToAdd;
+
+    private ArrayList<Playlist> mPlaylists = new ArrayList<>();
 
       // vars
 
@@ -77,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements
       private boolean mWasConfigurationChanged = false;
       private boolean isNewPlaylist;
 
+      // Repository object
+      private PlaylistRepository mPlaylistRepository;
+      ArrayList<Playlist> playlists = new ArrayList<>();
+
 
 
     @Override
@@ -89,13 +99,15 @@ public class MainActivity extends AppCompatActivity implements
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
+        mPlaylistRepository = new PlaylistRepository(this);
+
         verifyPermissions();
 
 //        songList = retriveSongs();
         mySongs = findSongs(Environment.getExternalStorageDirectory());
         for (int i = 0; i < mySongs.size(); i++) {
-            Song song = new Song(
-                    mySongs.get(i),
+            Songs song = new Songs(
+                    mySongs.get(i).getAbsolutePath(),
                     mySongs.get(i).getName().replace(".mp3",""),
                     getTimeSong(mySongs.get(i))
             );
@@ -113,11 +125,13 @@ public class MainActivity extends AppCompatActivity implements
         setupViewPager(mViewPager);
         mTabLayout.setupWithViewPager(mViewPager);
 
-        ArrayList<Song> songList2 = new ArrayList<>();
+//        ArrayList<Song> songList2 = new ArrayList<>();
+        ArrayList<Songs> songList2 = new ArrayList<>();
+
 
         for (int i = 0; i < mySongs.size()-1; i++) {
-            Song song = new Song(
-                    mySongs.get(i),
+            Songs song = new Songs(
+                    mySongs.get(i).getAbsolutePath(),
                     mySongs.get(i).getName().replace(".mp3",""),
                     getTimeSong(mySongs.get(i))
             );
@@ -127,9 +141,59 @@ public class MainActivity extends AppCompatActivity implements
         viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
         viewPagerAdapter.notifyDataSetChanged();
 
+        // get from repository
+
+        Log.d(TAG, "onCreate: We trying geting information database");
+        getPlaylistFromDatabase();
+
+
     }
 
+    public void addFromTabDatabase()
+    {
+        String titleList1 = playlists.get(0).getTitle();
+        ArrayList<Songs> songsFromDatabase1 = playlists.get(0).getSongs();
 
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songsFromDatabase1,"FromDataBase1"),"FromDataBase1");
+        viewPagerAdapter.notifyDataSetChanged();
+    }
+//    private void retrievePlaylist()
+//    {
+//        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
+//            @Override
+//            public void onChanged(List<Playlist> playlists)
+//            {
+//                if(mPlaylists.size() > 0)
+//                {
+//                    mPlaylists.clear();
+//                }
+//                if(playlists != null)
+//                {
+//                    mPlaylists.addAll(playlists);
+//                }
+//                // update the recyclerAdapter at least in his video
+//            }
+//        });
+//    }
+
+    // check whan you need to save it
+    private void saveChanges()
+    {
+  //      if (mIsNewPlaylist)
+        if(true)
+        {
+            saveNewPlaylist();
+        }
+        else
+        {
+
+        }
+    }
+
+    private void saveNewPlaylist()
+    {
+        mPlaylistRepository.insertPlaylistTask(mPlaylists.get(0));
+    }
 
     private void setupViewPager(ViewPager mViewPager) {
         viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
@@ -322,12 +386,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onAddPlaylistMenuSelected(Song songSelected)
+    public void onAddPlaylistMenuSelected(Songs songSelected)
     {
-        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().getAbsolutePath().toString());
+//        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().getAbsolutePath().toString());
+        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().toString());
         Toast.makeText(this, "add to playlist menu clicked", Toast.LENGTH_SHORT).show();
         songToAdd = songSelected;
-        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().getAbsolutePath().toString());
+//        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().getAbsolutePath().toString());
+        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().toString());
         Intent intent = new Intent(this, SelectPlayList.class);
 //        intent.putExtra("selected_song",songSelected);
         intent.putStringArrayListExtra("playlistTitles",viewPagerAdapter.getFragmentTitles());
@@ -361,14 +427,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void addSongToPlaylist(Song song, String playlist) {
+    public void addSongToPlaylist(Songs song, String playlist) {
         Log.d(TAG, "addSongToPlaylist: Called");
         ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlist))).addSongToList(song);
     }
 
-    public void addNewPlaylist(String newPlaylist,Song song)
+    public void addNewPlaylist(String newPlaylist,Songs song)
     {
-        ArrayList<Song> songNewList = new ArrayList<>();
+        ArrayList<Songs> songNewList = new ArrayList<>();
         songNewList.add(song);
         viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
         viewPagerAdapter.notifyDataSetChanged();
@@ -585,19 +651,36 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    private void addToMediaList(ArrayList<Song> songsList)
+    private void addToMediaList(ArrayList<Songs> songsList)
     {
         for (int i=0;i<songsList.size();i++)
         {
+            // for the new Songs Type
+            File file = new File(songsList.get(i).getFileSong());
             MediaMetadataCompat media = new MediaMetadataCompat.Builder()
                     // title = songName , artist=songTime
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
 //                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
+//                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
                     .build();
             mMediaList.add(media);
         }
+    }
+
+    private void  getPlaylistFromDatabase()
+    {
+        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
+            @Override
+            public void onChanged(List<Playlist> playlists)
+            {
+                Log.d(TAG, "onChanged: FromDataBase");
+                mPlaylists.get(0).setTitle(playlists.get(0).getTitle());
+                mPlaylists.get(0).setSongs(playlists.get(0).getSongs());
+            }
+        });
+        addFromTabDatabase();
     }
 
 }

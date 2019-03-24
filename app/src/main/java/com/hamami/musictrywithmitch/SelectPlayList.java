@@ -1,16 +1,15 @@
 package com.hamami.musictrywithmitch;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
+import com.hamami.musictrywithmitch.Models.Song;
+import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.SelectPlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;
 
@@ -34,7 +33,7 @@ public class SelectPlayList extends AppCompatActivity implements SelectPlaylistR
     private SelectPlaylistRecyclerAdapter mAdapter;
 
     private ArrayList<String> fragmentsTitles = new ArrayList<>();
-    private Song songSelected;
+    private Songs songSelected;
     private String thePlayList;
     private Boolean isNewPlaylist;
 

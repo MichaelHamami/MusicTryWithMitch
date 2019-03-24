@@ -1,7 +1,6 @@
 package com.hamami.musictrywithmitch.adapters;
 
 import android.content.Context;
-import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +8,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Song;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class SelectPlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

@@ -3,10 +3,9 @@ package com.hamami.musictrywithmitch.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaMetadataRetriever;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.hamami.musictrywithmitch.Song;
+import com.hamami.musictrywithmitch.Models.Song;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,9 +13,7 @@ import java.util.Set;
 
 import static com.hamami.musictrywithmitch.util.FavoriteConstants.FAVORITES_LIST_FILE_PATHS;
 import static com.hamami.musictrywithmitch.util.FavoriteConstants.FAVORITES_PLAYLIST_ID;
-import static com.hamami.musictrywithmitch.util.FavoriteConstants.FAVORITES_LAST_ARTIST;
 import static com.hamami.musictrywithmitch.util.FavoriteConstants.FAVORITES_MEDIA_QUEUE_POSITION;
-import static com.hamami.musictrywithmitch.util.FavoriteConstants.FAVORITES_NOW_PLAYING;
 
 public class FavoritePreferenceManager {
 
