@@ -1,8 +1,9 @@
 package com.hamami.musictrywithmitch;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Observer;
+import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -19,9 +20,15 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.hamami.musictrywithmitch.Models.Playlist;
+import com.hamami.musictrywithmitch.Models.Song;
+import com.hamami.musictrywithmitch.Models.Songs;
+import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
+import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelperCallback;
@@ -31,23 +38,40 @@ import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.QUEUE_NEW_PLAYLIST;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_MAX;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_PROGRESS;
 
-public class MainActivity extends AppCompatActivity implements IMainActivity,ActivityCompat.OnRequestPermissionsResultCallback, MediaBrowserHelperCallback {
+public class MainActivity extends AppCompatActivity implements
+        IMainActivity,
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        MediaBrowserHelperCallback {
     // Tag for debug
     private static final String TAG = "MainActivity";
 
-
     // for permission
-    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 0;
-    private View mLayout;
+    private static final String[] STORAGE_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    public ArrayList<Song> songList = new ArrayList<>();
-      ArrayList<File> mySongs = new ArrayList<>();
+
+    // layout
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private ViewPagerAdapter viewPagerAdapter;
+
+    // Songs Vars
+//    ArrayList<Song> songList = new ArrayList<>();
+    ArrayList<Songs> songList = new ArrayList<>();
+
+    ArrayList<File> mySongs = new ArrayList<>();
+    private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
+    private Songs songToAdd;
+
+      // vars
 
       private MediaBrowserHelper mMediaBrowserHelper;
       private MyApplication mMyApplication;
@@ -56,7 +80,13 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
       private SeekBarBroadcastReceiver mSeekBarBroadcastReceiver;
       private UpdateUIBroadcastReceiver mUpdateUIBroadcastReceiver;
       private boolean mOnAppOpen;
-      private boolean mWasConfigurationChanged;
+      private boolean mWasConfigurationChanged = false;
+      private boolean isNewPlaylist;
+
+      // Repository object
+      private PlaylistRepository mPlaylistRepository;
+      private ArrayList<Playlist> mPlaylists;
+      private Button button;
 
 
 
@@ -65,31 +95,142 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mLayout = findViewById(R.id.main_layout);
+        mTabLayout =  findViewById(R.id.tabLayout);
+        mViewPager = findViewById(R.id.main_container);
+        button = findViewById(R.id.updateFromDatabaseButton);
 
-        showReadPreview();
+        mPlaylists = new ArrayList<>();
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        mPlaylistRepository = new PlaylistRepository(this);
+
+        verifyPermissions();
+
+        getPlaylistFromDatabase();
 
 //        songList = retriveSongs();
         mySongs = findSongs(Environment.getExternalStorageDirectory());
         for (int i = 0; i < mySongs.size(); i++) {
-            Song song = new Song(
-                    mySongs.get(i),
+            Songs song = new Songs(
+                    mySongs.get(i).getAbsolutePath(),
                     mySongs.get(i).getName().replace(".mp3",""),
                     getTimeSong(mySongs.get(i))
             );
             songList.add(song);
         }
+        addToMediaList(songList);
+//        Playlist check1 = new Playlist("Title1",songList);
+
+
+
 
         mMyApplication = MyApplication.getInstance();
         mMyPrefManager = new MyPreferenceManager(this);
 
         mMediaBrowserHelper = new MediaBrowserHelper(this, MediaService.class);
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
-        testPlaylistFragment();
-        Toast.makeText(this,"onCreateFine",Toast.LENGTH_LONG).show();
+
+        setupViewPager(mViewPager);
+        mTabLayout.setupWithViewPager(mViewPager);
+
+//        ArrayList<Song> songList2 = new ArrayList<>();
+        ArrayList<Songs> songList2 = new ArrayList<>();
+
+
+        for (int i = 0; i < mySongs.size()-1; i++) {
+            Songs song = new Songs(
+                    mySongs.get(i).getAbsolutePath(),
+                    mySongs.get(i).getName().replace(".mp3",""),
+                    getTimeSong(mySongs.get(i))
+            );
+            songList2.add(song);
+        }
+
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
+//        viewPagerAdapter.notifyDataSetChanged();
+
+        // get from repository
+
+        Log.d(TAG, "onCreate: We trying geting information database");
+//        getPlaylistFromDatabase();
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                Log.d(TAG, "onClickButton: We trying geting information database after on Click");
+                getPlaylistFromDatabase();
+                addFromTabDatabase();
+            }
+        });
+
+
+
 
     }
+    private void  getPlaylistFromDatabase()
+    {
+        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
+            @Override
+            public void onChanged(List<Playlist> playlists)
+            {
+                Log.d(TAG, "onChanged: FromDataBase");
+                mPlaylists.clear();
+                mPlaylists.addAll(playlists);
+//                if(mPlaylists.size() != 0)
+//                {
+//                    mPlaylists.add(playlists.get(0));
+////                    mPlaylists.get(0).setTitle(playlists.get(0).getTitle());
+////                    mPlaylists.get(0).setSongs(playlists.get(0).getSongs());
+//                }
 
+            }
+        });
+    }
+
+    public void addFromTabDatabase()
+    {
+        String titleList1 = mPlaylists.get(0).getTitle();
+        ArrayList<Songs> songsFromDatabase1 = mPlaylists.get(0).getSongs();
+
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songsFromDatabase1,"FromDataBase1"),"FromDataBase1");
+        viewPagerAdapter.notifyDataSetChanged();
+    }
+//    private void retrievePlaylist()
+//    {
+//        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
+//            @Override
+//            public void onChanged(List<Playlist> playlists)
+//            {
+//                if(mPlaylists.size() > 0)
+//                {
+//                    mPlaylists.clear();
+//                }
+//                if(playlists != null)
+//                {
+//                    mPlaylists.addAll(playlists);
+//                }
+//                // update the recyclerAdapter at least in his video
+//            }
+//        });
+//    }
+
+
+    private void saveNewPlaylist()
+    {
+        mPlaylistRepository.insertPlaylistTask(mPlaylists.get(0));
+    }
+
+    private void setupViewPager(ViewPager mViewPager) {
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
+        mViewPager.setAdapter(viewPagerAdapter);
+    }
+    private void activePlaylistFragment()
+    {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_container, PlaylistFragment.newInstance(songList,"AllMusic")).commit();
+    }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -139,20 +280,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             {
                 Log.d(TAG, "playPause: we try to pause");
                 mMediaBrowserHelper.getTransportControls().pause();
-//                mIsPlaying = false;
             }
             else
             {
                 // play song
                 Log.d(TAG, "playPause: we call play song");
                 mMediaBrowserHelper.getTransportControls().play();
-//                mIsPlaying = true;
             }
         }
         else
         {
             if(!getMyPreferenceManager().getPlaylistId().equals(""))
             {
+                Log.d(TAG, "playPause: playlist is not null");
                 onMediaSelected(
                 getMyPreferenceManager().getPlaylistId(),
                         mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
@@ -161,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             }
             else
             {
+                Log.d(TAG, "playPause: selected something to play");
                 Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
             }
         }
@@ -168,7 +309,65 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
     }
 
     @Override
-    public MyApplication getMyApplication() {
+    public void playNext()
+    {
+        Log.d(TAG, "playNext: called");
+        if(mOnAppOpen)
+        {
+                Log.d(TAG, "playNext: we try to skip to next");
+                mMediaBrowserHelper.getTransportControls().skipToNext();
+
+        }
+        else
+        {
+            if(!getMyPreferenceManager().getPlaylistId().equals(""))
+            {
+                Log.d(TAG, "playNext: playlist is not null");
+                onMediaSelected(
+                        getMyPreferenceManager().getPlaylistId(),
+                        mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
+                        getMyPreferenceManager().getQueuePosition()
+                );
+            }
+            else
+            {
+                Log.d(TAG, "playNext: selected something to play");
+                Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void playPrev()
+    {
+        Log.d(TAG, "playPrev: called");
+        if(mOnAppOpen)
+        {
+            Log.d(TAG, "playPrev: we try to skip to previous");
+            mMediaBrowserHelper.getTransportControls().skipToPrevious();
+
+        }
+        else
+        {
+            if(!getMyPreferenceManager().getPlaylistId().equals(""))
+            {
+                Log.d(TAG, "playPrev: playlist is not null");
+                onMediaSelected(
+                        getMyPreferenceManager().getPlaylistId(),
+                        mMyApplication.getMediaItem(getMyPreferenceManager().getLastPlayedMedia()),
+                        getMyPreferenceManager().getQueuePosition()
+                );
+            }
+            else
+            {
+                Log.d(TAG, "playPrev: selected something to play");
+                Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public MyApplication getMyApplicationInstance() {
         return mMyApplication;
     }
 
@@ -180,69 +379,134 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
             Log.d(TAG,"onMediaSelected: Called: "+mediaItem.getDescription().getMediaId());
 
             String currentPlaylistId = getMyPreferenceManager().getPlaylistId();
+            Log.d(TAG, "onMediaSelected: currentPlaylistId is: "+currentPlaylistId +"||| compare with playlistId: "+playlistId);
 
             Bundle bundle = new Bundle();
             bundle.putInt(MEDIA_QUEUE_POSITION,queuePosition);
 
-//            if(playlistId.equals(currentPlaylistId))
-//            {
-//                Log.d(TAG,"onMediaSelected: its same playlist: "+mediaItem.getDescription().getMediaId());
-//                mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
-//            }
-//            else
-       //     {
-                Log.d(TAG,"onMediaSelected: its new playlist: "+mediaItem.getDescription().getMediaId());
+            if(playlistId.equals(currentPlaylistId))
+            {
+                if(mMyApplication.getMediaItems().isEmpty())
+                {
+                    Log.d(TAG, "onMediaSelected:  the list in myApplication is empty so we subscribe again.");
+                    mMediaBrowserHelper.subscribeToNewPlaylist(currentPlaylistId,playlistId);
+                }
+
+                Log.d(TAG,"onMediaSelected: its same playlist and not empty: "+playlistId);
+                mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
+            }
+            else
+            {
+                Log.d(TAG,"onMediaSelected: its new playlist: "+playlistId);
                 bundle.putBoolean(QUEUE_NEW_PLAYLIST,true);
-                mMediaBrowserHelper.subscribeToNewPlaylist(playlistId);
+                mMediaBrowserHelper.subscribeToNewPlaylist(currentPlaylistId,playlistId);
                 mMediaBrowserHelper.getTransportControls().playFromMediaId(mediaItem.getDescription().getMediaId(),bundle);
 
-       //     }
+            }
             mOnAppOpen = true;
         }
         else
         {
+            Log.d(TAG, "onMediaSelected: select something to play");
             Toast.makeText(this,"select something to play",Toast.LENGTH_SHORT).show();
         }
     }
+
+    @Override
+    public void onAddPlaylistMenuSelected(Songs songSelected)
+    {
+//        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().getAbsolutePath().toString());
+        Log.d(TAG, "onAddPlaylistMenuSelected: Called with Song: SongName: "+songSelected.getNameSong()+" | Song FilePath: "+songSelected.getFileSong().toString());
+        Toast.makeText(this, "add to playlist menu clicked", Toast.LENGTH_SHORT).show();
+        songToAdd = songSelected;
+//        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().getAbsolutePath().toString());
+        Log.d(TAG, "onAddPlaylistMenuSelected: Song: SongName: "+songToAdd.getNameSong()+" | Song FilePath: "+songToAdd.getFileSong().toString());
+        Intent intent = new Intent(this, SelectPlayList.class);
+//        intent.putExtra("selected_song",songSelected);
+        intent.putStringArrayListExtra("playlistTitles",viewPagerAdapter.getFragmentTitles());
+        // Pass tow argument intent and request code
+        startActivityForResult(intent,4);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==4){
+            Log.d(TAG, "onActivityResult: Called:");
+            // code here when they back
+            //Check if it is new playlist
+            isNewPlaylist = data.getBooleanExtra("isNewPlaylist",false);
+            Log.d(TAG, "onActivityResult: the Playlist is new?: " +isNewPlaylist);
+            if(isNewPlaylist == true)
+            {
+                String newPlaylist = data.getStringExtra("newPlaylist");
+                addNewPlaylist(newPlaylist,songToAdd);
+
+            }
+            // it is selected playlist from our list
+            else
+            {
+                String selectedPlaylist = data.getStringExtra("selectedPlaylist");
+                addSongToPlaylist(songToAdd,selectedPlaylist);
+            }
+
+        }
+    }
+
+    @Override
+    public void addSongToPlaylist(Songs song, String playlist) {
+        Log.d(TAG, "addSongToPlaylist: Called");
+        ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlist))).addSongToList(song);
+    }
+
+    public void addNewPlaylist(String newPlaylist,Songs song)
+    {
+        ArrayList<Songs> songNewList = new ArrayList<>();
+        songNewList.add(song);
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
+        viewPagerAdapter.notifyDataSetChanged();
+    }
+
 
     @Override
     public MyPreferenceManager getMyPreferenceManager() {
         return mMyPrefManager;
     }
 
+    
     @Override
     protected void onStart() {
         // when the app started
+        Log.d(TAG, "onStart: Called");
         super.onStart();
-//        mLayout = findViewById(R.id.main_layout);
-//
-//        showReadPreview();
-
-//        mMediaBrowserHelper.onStart();
-        if(!getMyPreferenceManager().getPlaylistId().equals(""))
+        if (!getMyPreferenceManager().getPlaylistId().equals(""))
         {
-//            preparedLastPlayedMedia();
+            preparedLastPlayedMedia();
+        }
+        else
+        {
+            Log.d(TAG, "onStart: else called will do MediaBrowser onStart");
             mMediaBrowserHelper.onStart(mWasConfigurationChanged);
         }
-        else {
-            mMediaBrowserHelper.onStart(mWasConfigurationChanged);
-        }
-
     }
 
     private void preparedLastPlayedMedia()
     {
-        // he get data from firebase to get last media
-        String lastMediaItemName = getMyPreferenceManager().getLastPlayedMedia();
-        Log.d(TAG, "preparedLastPlayedMedia: lastMediaItemName is: " + lastMediaItemName);
+        // he get data from firebase to get last media and all media.
+        Log.d(TAG, "preparedLastPlayedMedia: Called");
 
-        MediaMetadataCompat mediaItem = new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,lastMediaItemName)
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE,lastMediaItemName)
-                //  need to get uri
-//                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+        for(int i = 0; i<songList.size(); i++)
+        {
+            if(mMediaList.get(i).getDescription().getMediaId().equals(getMyPreferenceManager().getLastPlayedMedia())){
+                getMediaControllerFragment().setMediaTitle(mMediaList.get(i));
+            }
+        }
+        onFinishedGettingPreviousSessionData(mMediaList);
 
-                .build();
+    }
+    private void onFinishedGettingPreviousSessionData(List<MediaMetadataCompat> mediaItems){
+        mMyApplication.setMediaItems(mediaItems);
+        mMediaBrowserHelper.onStart(mWasConfigurationChanged);
 
     }
 
@@ -252,14 +516,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         getMediaControllerFragment().getMediaSeekBar().disconnectController();
         mMediaBrowserHelper.onStop();
     }
-
-    private void testPlaylistFragment()
-    {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_container, PlaylistFragment.newInstance(songList)).commit();
-    }
-
-
 
     private ArrayList<Song> retriveSongs()
     {
@@ -319,74 +575,29 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
         return time;
     }
 
-    private void requestReadPermission() {
-        // Permission has not been granted and must be requested.
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // Display a SnackBar with cda button to request the missing permission.
-            Snackbar.make(mLayout,"can you approve?" ,
-                    Snackbar.LENGTH_INDEFINITE).setAction("okey", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
-                }
-            }).show();
+    private void verifyPermissions(){
+        Log.d(TAG, "verifyPermissions: Checking Permissions.");
 
-        } else {
-            Snackbar.make(mLayout, "Read Storage unvailable", Snackbar.LENGTH_SHORT).show();
-            // Request the permission. The result will be received in onRequestPermissionResult().
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
-        }
-    } // checked
 
-    private void showReadPreview() {
-        // BEGIN_INCLUDE(startCamera)
-        // Check if the Camera permission has been granted
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Permission is already available, start camera preview
-//            Toast.makeText(this,"Granted checked",Toast.LENGTH_LONG).show();
-//            Toast.makeText(this,"Do Something",Toast.LENGTH_LONG).show();
-            mySongs = findSongs(Environment.getExternalStorageDirectory());
-        } else {
-            // Permission is missing and must be requested.
-            requestReadPermission();
+        int permissionExternalMemory = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionExternalMemory != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    STORAGE_PERMISSIONS,
+                    1
+            );
         }
-        // END_INCLUDE(startCamera)
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        // BEGIN_INCLUDE(onRequestPermissionsResult)
-        if (requestCode == PERMISSION_REQUEST_READ_EXTERNAL_STORAGE) {
-            // Request for camera permission.
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission has been granted. Start camera preview Activity.
-//                Toast.makeText(this,"Granted",Toast.LENGTH_LONG).show();
-//                Toast.makeText(this,"Do Something",Toast.LENGTH_LONG).show();
-                mySongs = findSongs(Environment.getExternalStorageDirectory());
 
-
-            } else {
-                // Permission request was denied.
-                Toast.makeText(this,"not approved",Toast.LENGTH_LONG).show();
-            }
-        }
-        // END_INCLUDE(onRequestPermissionsResult)
-    }
     private PlaylistFragment getPlaylistFragment()
     {
         PlaylistFragment PlaylistFragment = (PlaylistFragment)getSupportFragmentManager()
                 .findFragmentByTag(getString(R.string.fragment_playlist));
         if (PlaylistFragment != null)
         {
+            Log.d(TAG, "getPlaylistFragment:  we get the playlistfragment");
             return PlaylistFragment;
         }
         return null;
@@ -467,6 +678,23 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,Act
 
     }
 
+    private void addToMediaList(ArrayList<Songs> songsList)
+    {
+        for (int i=0;i<songsList.size();i++)
+        {
+            // for the new Songs Type
+            File file = new File(songsList.get(i).getFileSong());
+            MediaMetadataCompat media = new MediaMetadataCompat.Builder()
+                    // title = songName , artist=songTime
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
+//                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
+//                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
+                    .build();
+            mMediaList.add(media);
+        }
+    }
 
 
 }

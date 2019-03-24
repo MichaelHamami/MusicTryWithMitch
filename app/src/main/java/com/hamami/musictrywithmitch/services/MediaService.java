@@ -11,6 +11,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.hamami.musictrywithmitch.MainActivity;
 import com.hamami.musictrywithmitch.MyApplication;
 import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.notifications.MediaNotificationManager;
@@ -88,22 +89,28 @@ public class MediaService extends MediaBrowserServiceCompat
         Log.d(TAG,"onGetRoot: called");
         if(clientPackageName.equals(getApplicationContext().getPackageName())){
             //allowed to browser media
+            Log.d(TAG, "onGetRoot: get media from some real playlist");
             return new BrowserRoot("some_real_playlist",null);
         }
+        Log.d(TAG, "onGetRoot: no media");
         return new BrowserRoot("empty_media",null);
+
     }
 
     @Override
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result)
     {
-        Log.d(TAG,"onLoadChildren: called" +parentId +", "+ result);
+        Log.d(TAG,"onLoadChildren: called parentId: " +parentId +", result list:  "+ result);
         if(TextUtils.equals("empty_media",parentId)){
             result.sendResult(null);
             return;
         }
 
 //        result.sendResult(MediaLibrary.getMediaItems());
+        // get the media items and sent it to MediaBrowserSubscriptionCallback ... then goes to onChildrenLoaded to add the items. to the list.
+        Log.d(TAG, "onLoadChildren: list can be loaded ? size: "+ mMyApplication.getMediaItems().size());
         result.sendResult(mMyApplication.getMediaItems());
+//        result.sendResult();
     }
 
     public class MediaSessionCallback extends MediaSessionCompat.Callback
@@ -123,6 +130,7 @@ public class MediaService extends MediaBrowserServiceCompat
 
             if(extras.getBoolean(QUEUE_NEW_PLAYLIST,false))
             {
+                Log.d(TAG, "onPlayFromMediaId: reset playlist");
                 resetPlaylist();
             }
 
@@ -168,6 +176,7 @@ public class MediaService extends MediaBrowserServiceCompat
             Log.d(TAG, "onPrepare: called");
             if(mQueueIndex < 0 && mPlaylist.isEmpty())
             {
+                Log.d(TAG, "onPrepare:  return nothing from onPrepare");
                 return;
             }
             String mediaId = mPlaylist.get(mQueueIndex).getDescription().getMediaId();
@@ -185,7 +194,7 @@ public class MediaService extends MediaBrowserServiceCompat
         @Override
         public void onPlay() {
             Log.d(TAG, "onPlay: called");
-            if(isReadyToPlay())
+            if(!isReadyToPlay())
             {
                 return;
             }
@@ -194,7 +203,6 @@ public class MediaService extends MediaBrowserServiceCompat
                 onPrepare();
             }
             mPlayback.playFromMedia(mPreparedMedia);
-
             mMyPrefManager.saveQueuePosition(mQueueIndex);
             mMyPrefManager.saveLastPlayedMedia(mPreparedMedia.getDescription().getMediaId());
         }
@@ -203,6 +211,13 @@ public class MediaService extends MediaBrowserServiceCompat
         public void onPause() {
             Log.d(TAG, "onPause: called");
             mPlayback.pause();
+        }
+
+        @Override
+        public void onStop() {
+            Log.d(TAG, "onStop: called");
+            mPlayback.stop();
+            mSession.setActive(false);
         }
 
         @Override
@@ -217,28 +232,19 @@ public class MediaService extends MediaBrowserServiceCompat
         @Override
         public void onSkipToPrevious() {
             Log.d(TAG,"onSkipToPrevious: SKIP TO PREVIOUS");
-
             mQueueIndex = mQueueIndex > 0 ? mQueueIndex-1 : mPlaylist.size() - 1;
             mPreparedMedia = null;
             onPlay();
 
         }
-
-        @Override
-        public void onStop() {
-            Log.d(TAG, "onStop: called");
-            mPlayback.stop();
-            mSession.setActive(false);
-        }
-
         @Override
         public void onSeekTo(long pos) {
             mPlayback.seekTo(pos);
         }
 
-
         private boolean isReadyToPlay()
         {
+            if(mPlaylist.isEmpty()) Log.d(TAG, "isReadyToPlay: playlist is empty ... size: " +mPlaylist.size());
             return (!mPlaylist.isEmpty());
         }
     }

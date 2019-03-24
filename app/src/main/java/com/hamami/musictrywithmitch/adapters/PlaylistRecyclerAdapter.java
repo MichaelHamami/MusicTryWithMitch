@@ -1,4 +1,4 @@
-package com.hamami.musictrywithmitch;
+package com.hamami.musictrywithmitch.adapters;
 
 import android.content.Context;
 import android.support.v4.media.MediaMetadataCompat;
@@ -8,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+
+import com.hamami.musictrywithmitch.Models.Songs;
+import com.hamami.musictrywithmitch.R;
+import com.hamami.musictrywithmitch.Models.Song;
 
 import java.util.ArrayList;
 
@@ -20,12 +24,12 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private static final String TAG = "PlaylistRecyclerAdapter";
 
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Song> songsList = new ArrayList<>();
+    private ArrayList<Songs> songsList = new ArrayList<>();
     private Context mContext;
     private IMediaSelector mIMediaSelector;
     private int mSelectedIndex;
 
-    public PlaylistRecyclerAdapter(Context context, ArrayList<Song> songsList, ArrayList<MediaMetadataCompat> mMediaList,IMediaSelector mediaSelector)
+    public PlaylistRecyclerAdapter(Context context, ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mMediaList,IMediaSelector mediaSelector)
     {
         Log.d(TAG, "PlaylistRecyclerAdapter: called.");
         this.mMediaList = mMediaList;
@@ -50,7 +54,7 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
 //         ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
 
         ((ViewHolder)viewHolder).songName.setText(mMediaList.get(i).getDescription().getTitle());
-        ((ViewHolder)viewHolder).songTime.setText(mMediaList.get(i).getDescription().getSubtitle());
+        ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
 
         if(i == mSelectedIndex){
             ((ViewHolder)viewHolder).songName.setTextColor(ContextCompat.getColor(mContext, R.color.green));
@@ -98,16 +102,25 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
             this.iMediaSelector = iMediaSelector;
 
             itemView.setOnClickListener(this);
+            songOptions.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            iMediaSelector.onMediaSelected(getAdapterPosition());
+            if(view.getId() == R.id.song_option)
+            {
+                iMediaSelector.onSongOptionSelected(getAdapterPosition(),view);
+            }
+            else
+            {
+                iMediaSelector.onMediaSelected(getAdapterPosition());
+            }
         }
     }
 
     public interface IMediaSelector{
         void onMediaSelected(int position);
+        void onSongOptionSelected(int position,View view);
     }
 
 }

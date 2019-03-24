@@ -1,29 +1,17 @@
 package com.hamami.musictrywithmitch.util;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.view.View;
-import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.hamami.musictrywithmitch.MainActivity;
-import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Song;
+import com.hamami.musictrywithmitch.Models.Song;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
 public class MediaStorageLibrary {
 

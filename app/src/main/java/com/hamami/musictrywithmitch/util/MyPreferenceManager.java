@@ -6,8 +6,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import static com.hamami.musictrywithmitch.util.Constants.LAST_ARTIST;
-import static com.hamami.musictrywithmitch.util.Constants.LAST_ARTIST_IMAGE;
-import static com.hamami.musictrywithmitch.util.Constants.LAST_CATEGORY;
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.NOW_PLAYING;
 import static com.hamami.musictrywithmitch.util.Constants.PLAYLIST_ID;
@@ -45,22 +43,18 @@ public class MyPreferenceManager {
         return mPreferences.getInt(MEDIA_QUEUE_POSITION, -1);
     }
 
-    public void saveLastPlayedArtistImage(String url){
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(LAST_ARTIST_IMAGE, url);
-        editor.apply();
-    }
+//    public void saveLastPlayedArtistImage(String url){
+//        SharedPreferences.Editor editor = mPreferences.edit();
+//        editor.putString(LAST_ARTIST_IMAGE, url);
+//        editor.apply();
+//    }
 
-    public String getLastPlayedArtistImage(){
-        return  mPreferences.getString(LAST_ARTIST_IMAGE, "");
-    }
+//    public String getLastPlayedArtistImage(){
+//        return  mPreferences.getString(LAST_ARTIST_IMAGE, "");
+//    }
 
     public String getLastPlayedArtist(){
         return  mPreferences.getString(LAST_ARTIST, "");
-    }
-
-    public String getLastCategory(){
-        return  mPreferences.getString(LAST_CATEGORY, "");
     }
 
     public void saveLastPlayedMedia(String mediaId){
@@ -73,11 +67,6 @@ public class MyPreferenceManager {
         return mPreferences.getString(NOW_PLAYING, "");
     }
 
-    public void saveLastPlayedCategory(String category){
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(LAST_CATEGORY, category);
-        editor.apply();
-    }
 
     public void saveLastPlayedArtist(String artist){
         SharedPreferences.Editor editor = mPreferences.edit();
