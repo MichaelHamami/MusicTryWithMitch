@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.hamami.musictrywithmitch.persistence.Converter;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
@@ -22,12 +23,11 @@ public class Playlist implements Parcelable {
     @ColumnInfo(name = "title")
     private String title;
 
-    @NonNull
     @ColumnInfo(name = "songs")
     @TypeConverters(Converter.class)
     private ArrayList<Songs> songs;
 
-    public Playlist(String title,ArrayList<Songs> songs) {
+    public Playlist(@NonNull String title,ArrayList<Songs> songs) {
         this.title = title;
         this.songs = songs;
     }
@@ -38,8 +38,19 @@ public class Playlist implements Parcelable {
     }
 
     protected Playlist(Parcel in) {
-        title = in.readString();
+        title = Objects.requireNonNull(in.readString());
         songs = in.createTypedArrayList(Songs.CREATOR);
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeTypedList(songs);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
@@ -54,11 +65,13 @@ public class Playlist implements Parcelable {
         }
     };
 
+
+    @NonNull
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@NonNull String title) {
         this.title = title;
     }
 
@@ -71,6 +84,7 @@ public class Playlist implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "Playlist{" +
                 "title='" + title + '\'' +
@@ -78,14 +92,4 @@ public class Playlist implements Parcelable {
                 '}';
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title);
-        dest.writeTypedList(songs);
-    }
 }

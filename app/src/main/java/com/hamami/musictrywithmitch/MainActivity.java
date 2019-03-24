@@ -19,6 +19,8 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
@@ -69,8 +71,6 @@ public class MainActivity extends AppCompatActivity implements
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
     private Songs songToAdd;
 
-    private ArrayList<Playlist> mPlaylists = new ArrayList<>();
-
       // vars
 
       private MediaBrowserHelper mMediaBrowserHelper;
@@ -85,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements
 
       // Repository object
       private PlaylistRepository mPlaylistRepository;
-      ArrayList<Playlist> playlists = new ArrayList<>();
+      private ArrayList<Playlist> mPlaylists;
+      private Button button;
 
 
 
@@ -96,12 +97,16 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
+        button = findViewById(R.id.updateFromDatabaseButton);
 
+        mPlaylists = new ArrayList<>();
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         mPlaylistRepository = new PlaylistRepository(this);
 
         verifyPermissions();
+
+        getPlaylistFromDatabase();
 
 //        songList = retriveSongs();
         mySongs = findSongs(Environment.getExternalStorageDirectory());
@@ -114,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements
             songList.add(song);
         }
         addToMediaList(songList);
+//        Playlist check1 = new Playlist("Title1",songList);
+
+
 
 
         mMyApplication = MyApplication.getInstance();
@@ -138,21 +146,53 @@ public class MainActivity extends AppCompatActivity implements
             songList2.add(song);
         }
 
-        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
-        viewPagerAdapter.notifyDataSetChanged();
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
+//        viewPagerAdapter.notifyDataSetChanged();
 
         // get from repository
 
         Log.d(TAG, "onCreate: We trying geting information database");
-        getPlaylistFromDatabase();
+//        getPlaylistFromDatabase();
 
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                Log.d(TAG, "onClickButton: We trying geting information database after on Click");
+                getPlaylistFromDatabase();
+                addFromTabDatabase();
+            }
+        });
+
+
+
+
+    }
+    private void  getPlaylistFromDatabase()
+    {
+        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
+            @Override
+            public void onChanged(List<Playlist> playlists)
+            {
+                Log.d(TAG, "onChanged: FromDataBase");
+                mPlaylists.clear();
+                mPlaylists.addAll(playlists);
+//                if(mPlaylists.size() != 0)
+//                {
+//                    mPlaylists.add(playlists.get(0));
+////                    mPlaylists.get(0).setTitle(playlists.get(0).getTitle());
+////                    mPlaylists.get(0).setSongs(playlists.get(0).getSongs());
+//                }
+
+            }
+        });
     }
 
     public void addFromTabDatabase()
     {
-        String titleList1 = playlists.get(0).getTitle();
-        ArrayList<Songs> songsFromDatabase1 = playlists.get(0).getSongs();
+        String titleList1 = mPlaylists.get(0).getTitle();
+        ArrayList<Songs> songsFromDatabase1 = mPlaylists.get(0).getSongs();
 
         viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songsFromDatabase1,"FromDataBase1"),"FromDataBase1");
         viewPagerAdapter.notifyDataSetChanged();
@@ -176,19 +216,6 @@ public class MainActivity extends AppCompatActivity implements
 //        });
 //    }
 
-    // check whan you need to save it
-    private void saveChanges()
-    {
-  //      if (mIsNewPlaylist)
-        if(true)
-        {
-            saveNewPlaylist();
-        }
-        else
-        {
-
-        }
-    }
 
     private void saveNewPlaylist()
     {
@@ -669,18 +696,5 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void  getPlaylistFromDatabase()
-    {
-        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
-            @Override
-            public void onChanged(List<Playlist> playlists)
-            {
-                Log.d(TAG, "onChanged: FromDataBase");
-                mPlaylists.get(0).setTitle(playlists.get(0).getTitle());
-                mPlaylists.get(0).setSongs(playlists.get(0).getSongs());
-            }
-        });
-        addFromTabDatabase();
-    }
 
 }

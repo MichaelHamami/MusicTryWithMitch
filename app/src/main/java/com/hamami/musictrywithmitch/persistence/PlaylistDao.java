@@ -15,7 +15,7 @@ import androidx.room.Update;
 public interface PlaylistDao {
 
     @Insert
-    long[] insert(Playlist... playlist);
+    long[] insertPlaylist(Playlist... playlist);
 
     @Query("SELECT * FROM playlists")
     LiveData<List<Playlist>> getPlaylists();

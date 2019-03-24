@@ -19,7 +19,7 @@ public class InsertAsyncTask extends AsyncTask<Playlist,Void,Void> {
     protected Void doInBackground(Playlist... playlists) {
         Log.d(TAG, "doInBackground: thread: " +Thread.currentThread().getName());
         Log.d(TAG, "doInBackground: InsertAsync Called");
-        mPlaylistDao.insert(playlists);
+        mPlaylistDao.insertPlaylist(playlists);
         return null;
     }
 }

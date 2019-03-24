@@ -39,12 +39,15 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
 
     //Vars
     // the title we will get from bundle
-    private String playlistTitle;
+    private String mPlaylistTitle;
     private PlaylistRecyclerAdapter mAdapter;
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
     private ArrayList<Songs> songsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
     private MediaMetadataCompat mSelectedMedia;
+
+    // Repository
+    private PlaylistRepository mPlaylistRepository;
 
     public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
         Log.d(TAG, "playListFragment new Instance called!");
@@ -59,6 +62,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPlaylistRepository = new PlaylistRepository(getContext());
         if (getArguments() != null){
             Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
             if (songsList.size() ==0)
@@ -66,13 +70,11 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
                 Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
                 songsList = getArguments().getParcelableArrayList("songLists");
                 addToMediaList(songsList);
-                playlistTitle = getArguments().getString("title");
+                mPlaylistTitle = getArguments().getString("title");
+                savePlaylistToDatabase();
             }
 
             // try get Songs from data base sql
-
-            // only for now
-//            playlistTitle = "jokeForNow2";
 
             setRetainInstance(true);
 
@@ -131,7 +133,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
 
     private void updateDataSet() {
         mAdapter.notifyDataSetChanged();
-        if(mIMainActivity.getMyPreferenceManager().getLastPlayedArtist().equals(playlistTitle)){
+        if(mIMainActivity.getMyPreferenceManager().getLastPlayedArtist().equals(mPlaylistTitle)){
             getSelectedMediaItem(mIMainActivity.getMyPreferenceManager().getLastPlayedMedia());
         }
 
@@ -150,7 +152,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         mIMainActivity.getMyApplicationInstance().setMediaItems(mMediaList);
         mSelectedMedia = mMediaList.get(position);
         mAdapter.setSelectedIndex(position);
-        mIMainActivity.onMediaSelected(playlistTitle,mSelectedMedia,position);
+        mIMainActivity.onMediaSelected(mPlaylistTitle,mSelectedMedia,position);
         saveLastPlayedSongProperties();
 
     }
@@ -261,8 +263,8 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private void saveLastPlayedSongProperties()
     {
         // title is like the artist in mitch project
-        mIMainActivity.getMyPreferenceManager().savePlaylistId(playlistTitle);
-        mIMainActivity.getMyPreferenceManager().saveLastPlayedArtist(playlistTitle);
+        mIMainActivity.getMyPreferenceManager().savePlaylistId(mPlaylistTitle);
+        mIMainActivity.getMyPreferenceManager().saveLastPlayedArtist(mPlaylistTitle);
         mIMainActivity.getMyPreferenceManager().saveLastPlayedMedia(mSelectedMedia.getDescription().getMediaId());
 
     }
@@ -273,8 +275,10 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
         outState.putInt("selected_index",mAdapter.getSelectedIndex());
     }
 
-    private  void getPlaylistFromDatabase()
+    private  void savePlaylistToDatabase()
     {
-
+        Log.d(TAG, "savePlaylistToDatabase: we try to save the playlist to the database");
+        Log.d(TAG, "savePlaylistToDatabase: Title: "+mPlaylistTitle+" Songs size: "+songsList.size());
+        mPlaylistRepository.insertPlaylistTask(new Playlist(mPlaylistTitle,songsList));
     }
 }
