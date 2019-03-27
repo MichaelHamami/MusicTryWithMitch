@@ -68,4 +68,14 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         return mTitleTabs.get(position);
     }
 
+    public int getItemPositionByTitle(String title)
+    {
+        for(int i=0;i<mTitleTabs.size();i++)
+        {
+            if(mTitleTabs.get(i).equals(title))
+                return i;
+        }
+        return -1;
+    }
+
 }

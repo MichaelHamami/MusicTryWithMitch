@@ -11,6 +11,7 @@ public class UpdateAsyncTask extends AsyncTask<Playlist,Void,Void> {
     private static final String TAG = "InsertAsyncTask";
 
     private PlaylistDao mPlaylistDao;
+
     public UpdateAsyncTask(PlaylistDao dao) {
         mPlaylistDao = dao;
     }

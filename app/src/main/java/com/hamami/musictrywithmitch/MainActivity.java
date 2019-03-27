@@ -48,7 +48,6 @@ import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_PROGRESS;
 
 public class MainActivity extends AppCompatActivity implements
         IMainActivity,
-        ActivityCompat.OnRequestPermissionsResultCallback,
         MediaBrowserHelperCallback {
     // Tag for debug
     private static final String TAG = "MainActivity";
@@ -122,6 +121,17 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         mPlaylistRepository.retrievePlaylistsTask().observe(this,playlistObserver);
+        mPlaylistRepository.retrievePlaylistsTask();
+
+        Log.d(TAG, "onCreate: we start thread now:");
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "onCreate: we waited 10 secounds? ");
 
 //        getPlaylistFromDatabase();
 
@@ -132,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements
         mMediaBrowserHelper.setMediaBrowserHelperCallback(this);
 
         mViewPager.setAdapter(viewPagerAdapter);
-        setupViewPager(mViewPager);
+        setupViewPager();
         mTabLayout.setupWithViewPager(mViewPager);
 
 
@@ -204,23 +214,15 @@ public class MainActivity extends AppCompatActivity implements
             }
             if(foundTitle != true)
             {
-                viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i)),mPlaylists.get(i).getTitle());
+                viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
             }
             foundTitle = false;
         }
         viewPagerAdapter.notifyDataSetChanged();
     }
 
-    private void saveNewPlaylist()
-    {
-        mPlaylistRepository.insertPlaylistTask(mPlaylists.get(0));
-    }
+    private void setupViewPager() {
 
-    private void setupViewPager(ViewPager mViewPager) {
-//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList,"AllMusic"),"AllMusic");
-//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("AllMusic",songList)),"AllMusic");
-
-//        getPlaylistFromDatabase();
         if(mPlaylists.size() != 0)
         {
             boolean foundTitle = false;
@@ -237,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements
                }
                if(foundTitle != true)
                {
-                   viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i)),mPlaylists.get(i).getTitle());
+                   viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
                    viewPagerAdapter.notifyDataSetChanged();
                }
                 foundTitle = false;
@@ -247,10 +249,10 @@ public class MainActivity extends AppCompatActivity implements
         {
             Log.d(TAG, "setupViewPager: We get playlist from Storage");
             Playlist playlistFromStorage = retrivePlaylistFromStorage();
-            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(playlistFromStorage),playlistFromStorage.getTitle());
+            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(playlistFromStorage,true),playlistFromStorage.getTitle());
             ArrayList<Songs> sonlistinu = new ArrayList<>();
-            sonlistinu.add(playlistFromStorage.getSongs().get(0));
-            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu)),"Favorite");
+//            sonlistinu.add(playlistFromStorage.getSongs().get(0));
+//            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu),true),"Favorite");
             viewPagerAdapter.notifyDataSetChanged();
         }
     }
@@ -480,15 +482,20 @@ public class MainActivity extends AppCompatActivity implements
     public void addSongToPlaylist(Songs song, String playlist) {
         Log.d(TAG, "addSongToPlaylist: Called");
         ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlist))).addSongToList(song);
+        int position = viewPagerAdapter.getItemPositionByTitle(playlist);
+        mViewPager.setCurrentItem(position);
     }
+
 
     public void addNewPlaylist(String newPlaylist,Songs song)
     {
         ArrayList<Songs> songNewList = new ArrayList<>();
         songNewList.add(song);
 //        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songNewList,newPlaylist),newPlaylist);
-        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist(newPlaylist,songNewList)),newPlaylist);
+        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist(newPlaylist,songNewList),false),newPlaylist);
         viewPagerAdapter.notifyDataSetChanged();
+        int position = viewPagerAdapter.getItemPositionByTitle(newPlaylist);
+        mViewPager.setCurrentItem(position);
     }
 
 
@@ -497,7 +504,32 @@ public class MainActivity extends AppCompatActivity implements
         return mMyPrefManager;
     }
 
-    
+    @Override
+    public void insertToDatabase(Playlist playlist)
+    {
+        ArrayList<String> playlistTitles = new ArrayList<>();
+//        playlistTitles.addAll(mPlaylistRepository.getPlaylistTitles());
+        Log.d(TAG, "savePlaylistToDatabase: we try to save the playlist to the database");
+        Log.d(TAG, "savePlaylistToDatabase: Title: "+playlist.getTitle()+" Songs size: "+playlist.getSongs().size());
+        if( isThisNewPlaylist(playlist,playlistTitles) == true)
+        {
+            Log.d(TAG, "insertToDatabase: we insert new Playlist");
+            mPlaylistRepository.insertPlaylistTask(playlist);
+        }
+        else
+        {
+            Log.d(TAG, "insertToDatabase: this playlist :"+playlist.getTitle() +" are already in database");
+        }
+
+    }
+
+    @Override
+    public void updateToDatabase(Playlist playlist)
+    {
+        mPlaylistRepository.updatePlaylistTask(playlist);
+    }
+
+
     @Override
     protected void onStart() {
         // when the app started
@@ -622,7 +654,7 @@ public class MainActivity extends AppCompatActivity implements
                 .findFragmentByTag(getString(R.string.fragment_playlist));
         if (PlaylistFragment != null)
         {
-            Log.d(TAG, "getPlaylistFragment:  we get the playlistfragment");
+            Log.d(TAG, "getPlaylistFragment:  we get the playlistFragment");
             return PlaylistFragment;
         }
         return null;
@@ -721,5 +753,24 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
+    public boolean isThisNewPlaylist(Playlist playlist,ArrayList<String> titles)
+    {
+        Log.d(TAG, "isThisNewPlaylist: for checks size:" +mPlaylists.size());
+        for(int i = 0; i<mPlaylists.size(); i++)
+        {
+            if(mPlaylists.get(i).getTitle().equals(playlist.getTitle()))
+            {
+                return false;
+            }
+        }
+        return true;
+//        for(int i = 0; i<titles.size(); i++)
+//        {
+//            if(titles.get(i).equals(playlist.getTitle()))
+//            {
+//                return false;
+//            }
+//        }
+//        return true;
+    }
 }

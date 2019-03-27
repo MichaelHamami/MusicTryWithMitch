@@ -45,17 +45,20 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private ArrayList<Songs> songsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
     private MediaMetadataCompat mSelectedMedia;
+    private boolean mIsPlaylistInDatabase;
+    private Playlist mPlaylistFragment;
 
     // Repository
     private PlaylistRepository mPlaylistRepository;
 
 //    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
-public static PlaylistFragment newInstance(Playlist playlist){
+public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistInDatabase){
     Log.d(TAG, "playListFragment new Instance called!");
         PlaylistFragment playlistFragment = new PlaylistFragment();
         Bundle args = new Bundle();
         args.putParcelableArrayList("songLists",playlist.getSongs());
         args.putString("title",playlist.getTitle());
+        args.putBoolean("isPlaylistInDatabase",isPlaylistInDatabase);
         playlistFragment.setArguments(args);
         return playlistFragment;
     }
@@ -72,14 +75,16 @@ public static PlaylistFragment newInstance(Playlist playlist){
                 songsList = getArguments().getParcelableArrayList("songLists");
                 addToMediaList(songsList);
                 mPlaylistTitle = getArguments().getString("title");
-//                savePlaylistToDatabase();
+                mPlaylistFragment = new Playlist(mPlaylistTitle,songsList);
+                mIsPlaylistInDatabase = getArguments().getBoolean("isPlaylistInDatabase");
+
+                if(mIsPlaylistInDatabase == false)
+                {
+                    savePlaylistToDatabase();
+
+                }
             }
-
-            // try get Songs from data base sql
-
             setRetainInstance(true);
-
-
         }
     }
 
@@ -189,6 +194,7 @@ public static PlaylistFragment newInstance(Playlist playlist){
                     case R.id.addAsFavorite:
                         Log.d(TAG, "onMenuItemClick: add to Favorite menu  clicked ");
                         Toast.makeText(getContext(), "add to Favorite menu  clicked", Toast.LENGTH_SHORT).show();
+                        mIMainActivity.addSongToPlaylist(songsList.get(postion),"Favorite");
                         return true;
                     case R.id.addToQueue:
                         Log.d(TAG, "onMenuItemClick: Add to queue menu  clicked ");
@@ -233,9 +239,13 @@ public static PlaylistFragment newInstance(Playlist playlist){
                 .build();
         mMediaList.add(media);
         songsList.add(song);
+        // need to be change just dont want to make crush
+        // need to update database
+//        mPlaylistRepository.updatePlaylist(mPlaylistFragment);
+        mIMainActivity.updateToDatabase(mPlaylistFragment);
         updateDataSet();
     }
-    public  void deleteSongFromList(int position)
+    private   void deleteSongFromList(int position)
     {
         // need to be change just don't want to make crush
         if(songsList.size() == 1) return;
@@ -280,6 +290,30 @@ public static PlaylistFragment newInstance(Playlist playlist){
     {
         Log.d(TAG, "savePlaylistToDatabase: we try to save the playlist to the database");
         Log.d(TAG, "savePlaylistToDatabase: Title: "+mPlaylistTitle+" Songs size: "+songsList.size());
-        mPlaylistRepository.insertPlaylistTask(new Playlist(mPlaylistTitle,songsList));
+//        mPlaylistRepository.insertPlaylistTask(mPlaylistFragment);
+        mIMainActivity.insertToDatabase(mPlaylistFragment);
+
+//        ArrayList<String> playlistTitles = new ArrayList<>();
+////        playlistTitles.addAll(mPlaylistRepository.getPlaylistTitles());
+//        if( isThisNewPlaylist(mPlaylistFragment,playlistTitles) == true)
+//        {
+//            Log.d(TAG, "savePlaylistToDatabase: we insert new Playlist");
+//            mPlaylistRepository.insertPlaylistTask(new Playlist(mPlaylistTitle,songsList));
+//        }
+//        else
+//        {
+//            Log.d(TAG, "savePlaylistToDatabase: this playlist :"+mPlaylistFragment.getTitle() +" are already in database");
+//        }
+    }
+    public boolean isThisNewPlaylist(Playlist playlist,ArrayList<String> titles)
+    {
+        for(int i = 0; i<titles.size(); i++)
+        {
+            if(titles.get(i).equals(playlist.getTitle()))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

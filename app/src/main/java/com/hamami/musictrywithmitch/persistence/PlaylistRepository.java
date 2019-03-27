@@ -24,7 +24,7 @@ public class PlaylistRepository {
     {
         new InsertAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
     }
-    public void updatePlaylist(Playlist playlist)
+    public void updatePlaylistTask(Playlist playlist)
     {
         new UpdateAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
     }
@@ -34,13 +34,17 @@ public class PlaylistRepository {
         return mPlaylistDatabase.getPlaylistDao().getPlaylists();
     }
 
-    public List<Playlist> getPlaylistAsArrayList()
-    {
-        return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
-    }
-
-    public void deletePlaylist(Playlist playlist)
-    {
-        new DeleteAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
-    }
+//    public List<Playlist> getPlaylistAsArrayList()
+//    {
+//        return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
+//    }
+//
+//    public void deletePlaylist(Playlist playlist)
+//    {
+//        new DeleteAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
+//    }
+//    public List<String> getPlaylistTitles()
+//    {
+//        return mPlaylistDatabase.getPlaylistDao().getPlaylistTitles();
+//    }
 }
