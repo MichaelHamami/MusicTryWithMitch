@@ -551,6 +551,7 @@ public class MainActivity extends AppCompatActivity implements
 //        viewPagerAdapter.notifyDataSetChanged();
 //        int position = viewPagerAdapter.getItemPositionByTitle(newPlaylist);
 //        mViewPager.setCurrentItem(position);
+        /// secound trysddadsa
     }
 
 
