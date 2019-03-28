@@ -248,11 +248,19 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     private   void deleteSongFromList(int position)
     {
         // need to be change just don't want to make crush
-        if(songsList.size() == 1) return;
+        if(songsList.size() == 1)
+        {
+          mIMainActivity.removePlaylistFromDatabase(mPlaylistFragment);
+        }
 
-        songsList.remove(position);
-        mMediaList.remove(position);
-        updateDataSet();
+        else
+        {
+            songsList.remove(position);
+            mMediaList.remove(position);
+            mIMainActivity.updateToDatabase(mPlaylistFragment);
+            updateDataSet();
+        }
+
     }
 
     private void addToMediaList(ArrayList<Songs> songsList)

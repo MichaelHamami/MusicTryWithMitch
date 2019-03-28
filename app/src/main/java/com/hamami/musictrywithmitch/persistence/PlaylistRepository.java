@@ -38,11 +38,11 @@ public class PlaylistRepository {
     {
         return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
     }
-//
-//    public void deletePlaylist(Playlist playlist)
-//    {
-//        new DeleteAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
-//    }
+
+    public void deletePlaylist(Playlist playlist)
+    {
+        new DeleteAsyncTask(mPlaylistDatabase.getPlaylistDao()).execute(playlist);
+    }
 //    public List<String> getPlaylistTitles()
 //    {
 //        return mPlaylistDatabase.getPlaylistDao().getPlaylistTitles();

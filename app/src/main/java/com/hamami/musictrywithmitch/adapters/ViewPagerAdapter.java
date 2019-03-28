@@ -42,6 +42,11 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         mFragments.add(fragment);
         mTitleTabs.add(title);
     }
+    public void removeFragment(PlaylistFragment fragment, String title)
+    {
+        mFragments.remove(fragment);
+        mTitleTabs.remove(title);
+    }
     public Fragment getItemByTitle(String title)
     {
         for(int i=0;i<mFragments.size();i++)

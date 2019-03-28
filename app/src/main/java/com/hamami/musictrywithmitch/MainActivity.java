@@ -536,6 +536,23 @@ public class MainActivity extends AppCompatActivity implements
         mPlaylistRepository.updatePlaylistTask(playlist);
     }
 
+    @Override
+    public void removePlaylistFromDatabase(Playlist playlist) 
+    {
+        Log.d(TAG, "removePlaylistFromDatabase: we trying to remove");
+        PlaylistFragment playlistFragment = viewPagerAdapter.getFragments().get(viewPagerAdapter.getItemPositionByTitle(playlist.getTitle()));
+        Log.d(TAG, "removePlaylistFromDatabase: the fragment is? :"+playlistFragment);
+        mPlaylistRepository.deletePlaylist(playlist);
+        viewPagerAdapter.removeFragment(playlistFragment,playlist.getTitle());
+        viewPagerAdapter.notifyDataSetChanged();
+        mViewPager.setCurrentItem(0);
+        
+//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist(newPlaylist,songNewList),false),newPlaylist);
+//        viewPagerAdapter.notifyDataSetChanged();
+//        int position = viewPagerAdapter.getItemPositionByTitle(newPlaylist);
+//        mViewPager.setCurrentItem(position);
+    }
+
 
     @Override
     protected void onStart() {

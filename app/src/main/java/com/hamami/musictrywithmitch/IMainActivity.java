@@ -31,4 +31,6 @@ public interface IMainActivity {
 
     void updateToDatabase(Playlist playlist);
 
+    void removePlaylistFromDatabase(Playlist playlist);
+
 }
