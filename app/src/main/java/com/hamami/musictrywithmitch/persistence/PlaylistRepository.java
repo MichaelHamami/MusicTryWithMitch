@@ -34,10 +34,10 @@ public class PlaylistRepository {
         return mPlaylistDatabase.getPlaylistDao().getPlaylists();
     }
 
-//    public List<Playlist> getPlaylistAsArrayList()
-//    {
-//        return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
-//    }
+    public List<Playlist> getPlaylistAsArrayList()
+    {
+        return mPlaylistDatabase.getPlaylistDao().getPlaylistsAsArrayList();
+    }
 //
 //    public void deletePlaylist(Playlist playlist)
 //    {

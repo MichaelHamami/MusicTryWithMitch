@@ -21,8 +21,8 @@ public interface PlaylistDao {
     @Query("SELECT * FROM playlists")
     LiveData<List<Playlist>> getPlaylists();
 
-//    @Query("SELECT * FROM playlists")
-//    List<Playlist> getPlaylistsAsArrayList();
+    @Query("SELECT * FROM playlists")
+    List<Playlist> getPlaylistsAsArrayList();
 //
 //    @Query("SELECT * FROM playlists WHERE title LIKE :title")
 //    List<Playlist> getSpecificPlaylist(String title);

@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.media.MediaMetadataCompat;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Song;
@@ -110,11 +113,15 @@ public class MainActivity extends AppCompatActivity implements
 
         verifyPermissions();
 
+        new GetDataTask().execute();
+
+        Log.d(TAG, "onCreate: after the getDataTaske Size::"+mPlaylists.size());
+
         final Observer <List<Playlist>> playlistObserver = new Observer<List<Playlist>>() {
             @Override
             public void onChanged(List<Playlist> playlists)
             {
-                Log.d(TAG, "onChanged: FromDataBase");
+                Log.d(TAG, "onChanged: called LiveData Work : FromDataBase");
                 mPlaylists.clear();
                 mPlaylists.addAll(playlists);
                 addTheFragmentsFromDataBase();
@@ -772,5 +779,61 @@ public class MainActivity extends AppCompatActivity implements
 //            }
 //        }
 //        return true;
+    }
+
+    /**
+     * Creating Get Data Task for Getting Data From Web
+     */
+    public  class  GetDataTask extends AsyncTask<Void, Void, Void> {
+
+        ProgressDialog dialog;
+        int jIndex;
+        int x;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            // Progress Dialog for User Interaction
+
+//            JSONObject jsonObject = JSONParser.getDataFromWeb();
+
+//            x=list.size();
+
+            x=mPlaylists.size();
+
+            if(x==0)
+                jIndex=0;
+            else
+                jIndex=x;
+
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Wait plaease");
+            dialog.setMessage("we getting data from data base");
+            dialog.show();
+        }
+
+        @Nullable
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            //Getting data from database
+
+            Log.d(TAG, "doInBackground: trying to get playlist from database in GetDataTasak");
+            mPlaylists.addAll(mPlaylistRepository.getPlaylistAsArrayList());
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            dialog.dismiss();
+            if(mPlaylists.size() == 0)
+            {
+                Snackbar.make(findViewById(R.id.main_layout),"no Data from database", Snackbar.LENGTH_LONG).show();
+
+            }
+        }
     }
 }
