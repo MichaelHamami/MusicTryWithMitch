@@ -22,14 +22,12 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.hamami.musictrywithmitch.Models.Playlist;
-import com.hamami.musictrywithmitch.Models.Song;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
@@ -130,17 +128,13 @@ public class MainActivity extends AppCompatActivity implements
         mPlaylistRepository.retrievePlaylistsTask().observe(this,playlistObserver);
         mPlaylistRepository.retrievePlaylistsTask();
 
-        Log.d(TAG, "onCreate: we start thread now:");
 
         try {
+            Log.d(TAG, "onCreate: we start thread now:");
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        Log.d(TAG, "onCreate: we waited 10 secounds? ");
-
-//        getPlaylistFromDatabase();
 
         mMyApplication = MyApplication.getInstance();
         mMyPrefManager = new MyPreferenceManager(this);
@@ -233,33 +227,35 @@ public class MainActivity extends AppCompatActivity implements
         if(mPlaylists.size() != 0)
         {
             boolean foundTitle = false;
-            Log.d(TAG, "setupViewPager: We get playlist's  from Database");
+            Log.d(TAG, "setupViewPager: We get playlist's from Database Size is:"+mPlaylists.size());
             for(int i = 0; i < mPlaylists.size();i++)
             {
-               for(int j=0; j<viewPagerAdapter.getFragmentTitles().size(); j++)
-               {
-                   if(mPlaylists.get(i).getTitle().equals(viewPagerAdapter.getFragmentTitles().get(j)))
-                   {
-                       foundTitle = true;
-                   }
-
-               }
-               if(foundTitle != true)
-               {
-                   viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
-                   viewPagerAdapter.notifyDataSetChanged();
-               }
-                foundTitle = false;
+//               for(int j=0; j<viewPagerAdapter.getFragmentTitles().size(); j++)
+//               {
+//                   if(mPlaylists.get(i).getTitle().equals(viewPagerAdapter.getFragmentTitles().get(j)))
+//                   {
+//                       foundTitle = true;
+//                   }
+//
+//               }
+//               if(foundTitle != true)
+//               {
+//                   viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
+//                   viewPagerAdapter.notifyDataSetChanged();
+//               }
+//                foundTitle = false;
+                viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
             }
+            viewPagerAdapter.notifyDataSetChanged();
         }
         else
         {
             Log.d(TAG, "setupViewPager: We get playlist from Storage");
             Playlist playlistFromStorage = retrivePlaylistFromStorage();
-            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(playlistFromStorage,true),playlistFromStorage.getTitle());
+            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(playlistFromStorage,false),playlistFromStorage.getTitle());
             ArrayList<Songs> sonlistinu = new ArrayList<>();
-//            sonlistinu.add(playlistFromStorage.getSongs().get(0));
-//            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu),true),"Favorite");
+            sonlistinu.add(playlistFromStorage.getSongs().get(0));
+            viewPagerAdapter.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu),false),"Favorite");
             viewPagerAdapter.notifyDataSetChanged();
         }
     }
@@ -302,6 +298,12 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    public void  removeSongFromQueueList(MediaMetadataCompat mediaId)
+    {
+        Log.d(TAG, "removeSongFromQueueList: called");
+//        mMediaBrowserHelper.getTransportControls().onRemoveQueueItem(mediaId.getDescription());
+        mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId);
+    }
     @Override
     public void playPause()
     {
@@ -560,6 +562,7 @@ public class MainActivity extends AppCompatActivity implements
         // when the app started
         Log.d(TAG, "onStart: Called");
         super.onStart();
+        Log.d(TAG, "onStart: Called after super");
         if (!getMyPreferenceManager().getPlaylistId().equals(""))
         {
             preparedLastPlayedMedia();
@@ -576,13 +579,40 @@ public class MainActivity extends AppCompatActivity implements
         // he get data from firebase to get last media and all media.
         Log.d(TAG, "preparedLastPlayedMedia: Called");
 
-        for(int i = 0; i<songList.size(); i++)
+        String lastPlaylist = getMyPreferenceManager().getPlaylistId();
+        int position = -1;
+        for ( int i =0; i<mPlaylists.size(); i++)
         {
-            if(mMediaList.get(i).getDescription().getMediaId().equals(getMyPreferenceManager().getLastPlayedMedia())){
-                getMediaControllerFragment().setMediaTitle(mMediaList.get(i));
+            if(lastPlaylist.equals(mPlaylists.get(i).getTitle()))
+            {
+               position = i;
+                break;
             }
         }
-        onFinishedGettingPreviousSessionData(mMediaList);
+        Log.d(TAG, "preparedLastPlayedMedia: the positin is: "+position);
+
+        if(position != -1)
+        {
+            songList = mPlaylists.get(position).getSongs();
+            Log.d(TAG, "preparedLastPlayedMedia: songList size: "+songList.size());
+            addToMediaList(songList);
+            onFinishedGettingPreviousSessionData(mMediaList);
+        }
+        else
+        {
+            Log.d(TAG, "preparedLastPlayedMedia: else called will do MediaBrowser onStart");
+            mMediaBrowserHelper.onStart(mWasConfigurationChanged);
+        }
+
+//        Log.d(TAG, "preparedLastPlayedMedia: Size of songlist:  " +songList.size() + " MediaList size: "+mMediaList.size());
+
+//        for(int i = 0; i<songList.size(); i++)
+//        {
+//            if(mMediaList.get(i).getDescription().getMediaId().equals(getMyPreferenceManager().getLastPlayedMedia())){
+//                getMediaControllerFragment().setMediaTitle(mMediaList.get(i));
+//            }
+//        }
+//        onFinishedGettingPreviousSessionData(mMediaList);
 
     }
     private void onFinishedGettingPreviousSessionData(List<MediaMetadataCompat> mediaItems){

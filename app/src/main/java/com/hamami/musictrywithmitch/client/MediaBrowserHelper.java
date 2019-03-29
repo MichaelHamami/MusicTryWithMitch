@@ -87,6 +87,11 @@ public class MediaBrowserHelper {
         Log.d(TAG, "subscribeToNewPlaylist: mMediaBrowser is : "+mMediaBrowser);
         mMediaBrowser.subscribe(newPlaylistId,mMediaBrowserSubscriptionCallBack);
     }
+    public void removeQueueItemFromPlaylist(MediaMetadataCompat mediaId)
+    {
+        Log.d(TAG, "removeQueueItemFromPlaylist: Called we call to controller");
+        mMediaController.removeQueueItem(mediaId.getDescription());
+    }
     public void onStart(boolean wasConfigurationChanged)
     {
         mWasConfigurationChanged = wasConfigurationChanged;

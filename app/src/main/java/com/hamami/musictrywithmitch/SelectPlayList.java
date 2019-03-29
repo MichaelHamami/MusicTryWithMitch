@@ -8,7 +8,6 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.hamami.musictrywithmitch.Models.Song;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.SelectPlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;

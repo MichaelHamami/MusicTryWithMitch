@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Models.Song;
 
 import java.util.ArrayList;
 

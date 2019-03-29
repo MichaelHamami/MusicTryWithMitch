@@ -41,7 +41,6 @@ public class MediaService extends MediaBrowserServiceCompat
     private MediaSessionCompat mSession;
     private PlayerAdapter mPlayback;
     private MyApplication mMyApplication;
-//    private MediaLibrary mMediaLibrary;
     private MyPreferenceManager mMyPrefManager;
     private MediaNotificationManager mMediaNotificationManager;
     private boolean mIsServiceStarted;
@@ -50,7 +49,6 @@ public class MediaService extends MediaBrowserServiceCompat
     public void onCreate(){
         super.onCreate();
         Log.d(TAG,"onCreate: Called");
-//        mMediaLibrary = new MediaLibrary();
         mMyApplication = MyApplication.getInstance();
         mMyPrefManager = new MyPreferenceManager(this);
         //Build the MediaSession
@@ -105,12 +103,9 @@ public class MediaService extends MediaBrowserServiceCompat
             result.sendResult(null);
             return;
         }
-
-//        result.sendResult(MediaLibrary.getMediaItems());
         // get the media items and sent it to MediaBrowserSubscriptionCallback ... then goes to onChildrenLoaded to add the items. to the list.
         Log.d(TAG, "onLoadChildren: list can be loaded ? size: "+ mMyApplication.getMediaItems().size());
         result.sendResult(mMyApplication.getMediaItems());
-//        result.sendResult();
     }
 
     public class MediaSessionCallback extends MediaSessionCompat.Callback
@@ -148,6 +143,7 @@ public class MediaService extends MediaBrowserServiceCompat
             }
             else
             {
+                // this was something before last check Mediaservice 29.3
                 mQueueIndex = newQueuePosition;
             }
             mMyPrefManager.saveQueuePosition(mQueueIndex);
@@ -163,6 +159,7 @@ public class MediaService extends MediaBrowserServiceCompat
             mQueueIndex = (mQueueIndex == -1) ? 0 : mQueueIndex;
             mSession.setQueue(mPlaylist);
         }
+
 
         @Override
         public void onRemoveQueueItem(MediaDescriptionCompat description) {
@@ -180,7 +177,6 @@ public class MediaService extends MediaBrowserServiceCompat
                 return;
             }
             String mediaId = mPlaylist.get(mQueueIndex).getDescription().getMediaId();
-//            mPreparedMedia = mMediaLibrary.getTreeMap().get(mediaId);
             mPreparedMedia = mMyApplication.getTreeMap().get(mediaId);
             mSession.setMetadata(mPreparedMedia);
 
@@ -219,6 +215,7 @@ public class MediaService extends MediaBrowserServiceCompat
             mPlayback.stop();
             mSession.setActive(false);
         }
+
 
         @Override
         public void onSkipToNext() {
@@ -272,6 +269,7 @@ public class MediaService extends MediaBrowserServiceCompat
             //Report the state to the MediaSession
             mSession.setPlaybackState(state);
 
+            // manage the started state of this service.
             switch (state.getState())
             {
                 case PlaybackStateCompat.STATE_PLAYING:
@@ -315,6 +313,7 @@ public class MediaService extends MediaBrowserServiceCompat
 
             public void displayNotification(PlaybackStateCompat state)
             {
+                mState = state;
                 Notification notification = null;
                 switch (state.getState())
                 {

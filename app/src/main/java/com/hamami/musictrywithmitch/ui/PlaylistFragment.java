@@ -16,17 +16,14 @@ import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.R;
-import com.hamami.musictrywithmitch.Models.Song;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -255,28 +252,33 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
 
         else
         {
+            mIMainActivity.removeSongFromQueueList(mMediaList.get(position));
             songsList.remove(position);
             mMediaList.remove(position);
             mIMainActivity.updateToDatabase(mPlaylistFragment);
             updateDataSet();
         }
-
     }
 
     private void addToMediaList(ArrayList<Songs> songsList)
     {
         for (int i=0;i<songsList.size();i++)
         {
-            File file = new File(songsList.get(i).getFileSong());
-            MediaMetadataCompat media = new MediaMetadataCompat.Builder()
-                    // title = songName , artist=songTime
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
+            Log.d(TAG, "addToMediaList: pathSong:"+songsList.get(i).getFileSong());
+            Log.d(TAG, "addToMediaList: the songName: "+songsList.get(i).getNameSong() +" position in list: "+i);
+            if(songsList.get(i).getFileSong() != null)
+            {
+                File file = new File(songsList.get(i).getFileSong());
+                MediaMetadataCompat media = new MediaMetadataCompat.Builder()
+                        // title = songName , artist=songTime
+                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
+                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
 //                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
+                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
 //                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
-                    .build();
-            mMediaList.add(media);
+                        .build();
+                mMediaList.add(media);
+            }
         }
     }
     private void saveLastPlayedSongProperties()

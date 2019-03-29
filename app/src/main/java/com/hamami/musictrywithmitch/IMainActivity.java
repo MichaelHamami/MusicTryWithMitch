@@ -3,7 +3,6 @@ package com.hamami.musictrywithmitch;
 import android.support.v4.media.MediaMetadataCompat;
 
 import com.hamami.musictrywithmitch.Models.Playlist;
-import com.hamami.musictrywithmitch.Models.Song;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
@@ -32,5 +31,7 @@ public interface IMainActivity {
     void updateToDatabase(Playlist playlist);
 
     void removePlaylistFromDatabase(Playlist playlist);
+
+    void removeSongFromQueueList(MediaMetadataCompat mediaId);
 
 }
