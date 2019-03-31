@@ -32,6 +32,6 @@ public interface IMainActivity {
 
     void removePlaylistFromDatabase(Playlist playlist);
 
-    void removeSongFromQueueList(MediaMetadataCompat mediaId,String playlistId);
+    void removeSongFromQueueList(MediaMetadataCompat mediaId);
 
 }

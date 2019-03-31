@@ -296,14 +296,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void  removeSongFromQueueList(MediaMetadataCompat mediaId,String playlistId)
+    public void  removeSongFromQueueList(MediaMetadataCompat mediaId)
     {
-//             TODO: finish this code without bugs
-
-            Log.d(TAG, "removeSongFromQueueList: called");
-//        mMediaBrowserHelper.getTransportControls().onRemoveQueueItem(mediaId.getDescription());
+        Log.d(TAG, "removeSongFromQueueList: called");
         mMyApplication.removeSongFromListMedia(mediaId);
-        mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId,playlistId);
+        mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId);
 
     }
     @Override
