@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -65,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements
     private ViewPagerAdapter viewPagerAdapter;
 
     // Songs Vars
-//    ArrayList<Song> songList = new ArrayList<>();
     ArrayList<Songs> songList = new ArrayList<>();
 
     ArrayList<File> mySongs = new ArrayList<>();
@@ -98,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
-//        button = findViewById(R.id.updateFromDatabaseButton);
 
         mPlaylists = new ArrayList<>();
 
@@ -113,8 +110,6 @@ public class MainActivity extends AppCompatActivity implements
 
         new GetDataTask().execute();
 
-        Log.d(TAG, "onCreate: after the getDataTaske Size::"+mPlaylists.size());
-
         final Observer <List<Playlist>> playlistObserver = new Observer<List<Playlist>>() {
             @Override
             public void onChanged(List<Playlist> playlists)
@@ -122,7 +117,10 @@ public class MainActivity extends AppCompatActivity implements
                 Log.d(TAG, "onChanged: called LiveData Work : FromDataBase");
                 mPlaylists.clear();
                 mPlaylists.addAll(playlists);
-                addTheFragmentsFromDataBase();
+                if(mPlaylists.size() != viewPagerAdapter.getCount() || mPlaylists.size() == 0 )
+                {
+                    addTheFragmentsFromDataBase();
+                }
             }
         };
         mPlaylistRepository.retrievePlaylistsTask().observe(this,playlistObserver);
@@ -298,11 +296,15 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void  removeSongFromQueueList(MediaMetadataCompat mediaId)
+    public void  removeSongFromQueueList(MediaMetadataCompat mediaId,String playlistId)
     {
-        Log.d(TAG, "removeSongFromQueueList: called");
+//             TODO: finish this code without bugs
+
+            Log.d(TAG, "removeSongFromQueueList: called");
 //        mMediaBrowserHelper.getTransportControls().onRemoveQueueItem(mediaId.getDescription());
-        mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId);
+        mMyApplication.removeSongFromListMedia(mediaId);
+        mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId,playlistId);
+
     }
     @Override
     public void playPause()
@@ -681,7 +683,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             time = "0" + minutes + ":" + seconds;
         }
-//        Toast.makeText(this,time,Toast.LENGTH_LONG).show();
         // close object
         metaRetriever.release();
         return time;
@@ -748,6 +749,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
+
     @Override
     public void onMetadataChanged(MediaMetadataCompat metadata) {
         Log.d(TAG, "onMetadataChanged: called");

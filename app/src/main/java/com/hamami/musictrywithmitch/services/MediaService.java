@@ -66,6 +66,7 @@ public class MediaService extends MediaBrowserServiceCompat
         mMediaNotificationManager = new MediaNotificationManager(this);
     }
 
+
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         Log.d(TAG,"onTaskRemoved: stopped");
@@ -76,6 +77,7 @@ public class MediaService extends MediaBrowserServiceCompat
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         mSession.release();
         Log.d(TAG,"onDestroy: MediaSession released");
     }
@@ -128,13 +130,13 @@ public class MediaService extends MediaBrowserServiceCompat
                 Log.d(TAG, "onPlayFromMediaId: reset playlist");
                 resetPlaylist();
             }
-
             mPreparedMedia = mMyApplication.getMediaItem(mediaId);
             mSession.setMetadata(mPreparedMedia);
             if (!mSession.isActive())
             {
                 mSession.setActive(true);
             }
+
             mPlayback.playFromMedia(mPreparedMedia);
             int newQueuePosition = extras.getInt(MEDIA_QUEUE_POSITION,-1);
             if(newQueuePosition == -1)
@@ -154,7 +156,7 @@ public class MediaService extends MediaBrowserServiceCompat
 
         @Override
         public void onAddQueueItem(MediaDescriptionCompat description) {
-            Log.d(TAG,"onAddQueueItem: called: position in list: "+mPlaylist.size());
+            Log.d(TAG,"onAddQueueItem: called: Size list: "+mPlaylist.size());
             mPlaylist.add(new MediaSessionCompat.QueueItem(description,description.hashCode()));
             mQueueIndex = (mQueueIndex == -1) ? 0 : mQueueIndex;
             mSession.setQueue(mPlaylist);
@@ -163,8 +165,18 @@ public class MediaService extends MediaBrowserServiceCompat
 
         @Override
         public void onRemoveQueueItem(MediaDescriptionCompat description) {
-            Log.d(TAG,"onRemoveQueueItem: called: position in list: "+mPlaylist.size());
-            mPlaylist.remove(new MediaSessionCompat.QueueItem(description,description.hashCode()));
+            Log.d(TAG,"onRemoveQueueItem: called: Size list: "+mPlaylist.size());
+            Log.d(TAG, "onRemoveQueueItem: we try to remove item: "+description.getMediaId());
+            for(int i= 0; i<mPlaylist.size();i++)
+            {
+                if(mPlaylist.get(i).getDescription().getMediaId().equals(description.getMediaId()))
+                {
+                    Log.d(TAG, "onRemoveQueueItem: we removed: "+mPlaylist.get(i).getDescription().getMediaId());
+                    mPlaylist.remove(i);
+                    break;
+                }
+            }
+            Log.d(TAG, "onRemoveQueueItem:  Size list after remove: "+mPlaylist.size());
             mQueueIndex = (mPlaylist.isEmpty()) ? -1 : mQueueIndex;
             mSession.setQueue(mPlaylist);
         }
@@ -220,6 +232,7 @@ public class MediaService extends MediaBrowserServiceCompat
         @Override
         public void onSkipToNext() {
             Log.d(TAG,"onSkipToNext: SKIP TO NEXT");
+            Log.d(TAG, "onSkipToNext: the queueIndex before is: "+mQueueIndex +" playlistSize is: "+mPlaylist.size());
             mQueueIndex = (++mQueueIndex % mPlaylist.size());
             Log.d(TAG,"onSkipToNext: queue index: "+mQueueIndex);
             mPreparedMedia = null;

@@ -8,7 +8,7 @@ import com.hamami.musictrywithmitch.persistence.PlaylistDao;
 
 public class DeleteAsyncTask extends AsyncTask<Playlist,Void,Void> {
 
-    private static final String TAG = "InsertAsyncTask";
+    private static final String TAG = "DeleteAsyncTask";
 
     private PlaylistDao mPlaylistDao;
     public DeleteAsyncTask(PlaylistDao dao) {

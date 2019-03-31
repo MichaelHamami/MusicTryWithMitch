@@ -57,4 +57,24 @@ public class MyApplication extends Application {
         return mTreeMap.get(mediaId);
     }
 
+    public void removeSongFromListMedia(MediaMetadataCompat mediaId)
+    {
+        Log.d(TAG, "removeSongFromListMedia: remove song From list: "+mediaId.getDescription().getMediaId());
+
+        mTreeMap.remove(mediaId.getDescription().getMediaId());
+        for(int i=0; i<mMediaItems.size();i++)
+        {
+            if(mMediaItems.get(i).getDescription().getMediaId().equals(mediaId.getDescription().getMediaId()))
+            {
+                mMediaItems.remove(i);
+                return;
+            }
+        }
+//        mMediaItems.remove(
+//                new MediaBrowserCompat.MediaItem(
+//                        mediaId.getDescription(),MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+//
+//        );
+    }
+
 }

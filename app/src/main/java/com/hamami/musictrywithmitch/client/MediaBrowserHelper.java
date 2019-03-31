@@ -74,8 +74,6 @@ public class MediaBrowserHelper {
         public void onSessionDestroyed() {
             onPlaybackStateChanged(null);
         }
-
-
     }
 
     public void subscribeToNewPlaylist(String currentPlaylistId, String newPlaylistId){
@@ -89,9 +87,10 @@ public class MediaBrowserHelper {
     }
     public void removeQueueItemFromPlaylist(MediaMetadataCompat mediaId)
     {
-        Log.d(TAG, "removeQueueItemFromPlaylist: Called we call to controller");
+        Log.d(TAG, "removeQueueItemFromPlaylist: Called we call controller to remove");
         mMediaController.removeQueueItem(mediaId.getDescription());
     }
+
     public void onStart(boolean wasConfigurationChanged)
     {
         mWasConfigurationChanged = wasConfigurationChanged;
@@ -158,7 +157,20 @@ public class MediaBrowserHelper {
                 for(final MediaBrowserCompat.MediaItem mediaItem : children)
                 {
                     Log.d(TAG,"onChildrenLoaded: CALLED: queue item:" + mediaItem.getMediaId());
-                    mMediaController.addQueueItem(mediaItem.getDescription());
+                    if(mMediaController.getMetadata() != null)
+                    {
+                        if(!mMediaController.getMetadata().containsKey(mediaItem.getDescription().getMediaId()))
+                        {
+                            mMediaController.addQueueItem(mediaItem.getDescription());
+                        }
+                    }
+                    else
+                    {
+                        mMediaController.addQueueItem(mediaItem.getDescription());
+
+                    }
+
+//                    mMediaController.addQueueItem(mediaItem.getDescription());
                 }
         }
     }

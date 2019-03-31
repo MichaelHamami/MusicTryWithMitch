@@ -141,6 +141,8 @@ public class MediaPlayerAdapter extends PlayerAdapter {
 
     private void playFile(MediaMetadataCompat metadata) {
 
+        Log.d(TAG, "playFile: "+metadata);
+
         String mediaId = metadata.getDescription().getMediaId();
         boolean mediaChanged = (mCurrentMedia == null) || !mediaId.equals(mCurrentMedia.getDescription().getMediaId());
 

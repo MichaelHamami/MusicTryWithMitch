@@ -252,9 +252,10 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
 
         else
         {
-            mIMainActivity.removeSongFromQueueList(mMediaList.get(position));
+            MediaMetadataCompat theMediaToRemove = mMediaList.get(position);
             songsList.remove(position);
             mMediaList.remove(position);
+            mIMainActivity.removeSongFromQueueList(theMediaToRemove,mPlaylistTitle);
             mIMainActivity.updateToDatabase(mPlaylistFragment);
             updateDataSet();
         }
