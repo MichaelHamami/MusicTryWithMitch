@@ -21,6 +21,7 @@ import com.hamami.musictrywithmitch.players.PlayerAdapter;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -112,11 +113,13 @@ public class MediaService extends MediaBrowserServiceCompat
 
     public class MediaSessionCallback extends MediaSessionCompat.Callback
     {
+//        private final HashSet<MediaSessionCompat.QueueItem> mSetPlaylist = new HashSet<>();
         private final List<MediaSessionCompat.QueueItem> mPlaylist = new ArrayList<>();
         private int mQueueIndex = -1;
         private MediaMetadataCompat mPreparedMedia;
 
         private void resetPlaylist(){
+//            mSetPlaylist.clear();
             mPlaylist.clear();
             mQueueIndex = -1;
         }
@@ -157,6 +160,17 @@ public class MediaService extends MediaBrowserServiceCompat
         @Override
         public void onAddQueueItem(MediaDescriptionCompat description) {
             Log.d(TAG,"onAddQueueItem: called: Size list: "+mPlaylist.size());
+//            mSetPlaylist.add(new MediaSessionCompat.QueueItem(description,description.hashCode()));
+            for(int i=0;i<mPlaylist.size();i++)
+            {
+                Log.d(TAG, "onAddQueueItem: we compare" +mPlaylist.get(i).getDescription().getMediaId() + " || "+ description.getMediaId());
+                if(mPlaylist.get(i).getDescription().getMediaId().equals(description.getMediaId()))
+                {
+                    Log.d(TAG, "onAddQueueItem: "+description.getMediaId() + " allredy in?");
+                    return;
+                }
+
+            }
             mPlaylist.add(new MediaSessionCompat.QueueItem(description,description.hashCode()));
             mQueueIndex = (mQueueIndex == -1) ? 0 : mQueueIndex;
             mSession.setQueue(mPlaylist);

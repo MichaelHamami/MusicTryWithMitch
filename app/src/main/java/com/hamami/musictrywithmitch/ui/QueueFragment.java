@@ -14,8 +14,8 @@ import android.widget.Toast;
 import com.hamami.musictrywithmitch.IMainActivity;
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
-import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.R;
+import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 
 import java.io.File;
@@ -27,9 +27,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapter.IMediaSelector
+public class QueueFragment extends Fragment implements PlaylistRecyclerAdapter.IMediaSelector
 {
-    private static final String TAG = "PlaylistFragment";
+    private static final String TAG = "QueueFragment";
 
     // UI Components
     private RecyclerView mRecyclerView;
@@ -49,21 +49,19 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
     private PlaylistRepository mPlaylistRepository;
 
 //    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
-public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistInDatabase){
-    Log.d(TAG, "playListFragment new Instance called!");
-        PlaylistFragment playlistFragment = new PlaylistFragment();
+public static QueueFragment newInstance(Playlist playlist){
+    Log.d(TAG, "QueueFragment new Instance called!");
+        QueueFragment queueFragment = new QueueFragment();
         Bundle args = new Bundle();
         args.putParcelableArrayList("songLists",playlist.getSongs());
         args.putString("title",playlist.getTitle());
-        args.putBoolean("isPlaylistInDatabase",isPlaylistInDatabase);
-        playlistFragment.setArguments(args);
-        return playlistFragment;
+        queueFragment.setArguments(args);
+        return queueFragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mPlaylistRepository = new PlaylistRepository(getContext());
         if (getArguments() != null){
             Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
             if (songsList.size() ==0)
@@ -73,13 +71,6 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
                 addToMediaList(songsList);
                 mPlaylistTitle = getArguments().getString("title");
                 mPlaylistFragment = new Playlist(mPlaylistTitle,songsList);
-                mIsPlaylistInDatabase = getArguments().getBoolean("isPlaylistInDatabase");
-
-                if(mIsPlaylistInDatabase == false)
-                {
-                    savePlaylistToDatabase();
-
-                }
             }
             setRetainInstance(true);
         }
@@ -136,7 +127,8 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
 
     private void updateDataSet() {
         mAdapter.notifyDataSetChanged();
-        if(mIMainActivity.getMyPreferenceManager().getLastPlayedArtist().equals(mPlaylistTitle)){
+        if(mIMainActivity.getMyPreferenceManager().getLastPlayedArtist().equals(mPlaylistTitle))
+        {
             getSelectedMediaItem(mIMainActivity.getMyPreferenceManager().getLastPlayedMedia());
         }
 
@@ -175,24 +167,19 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.playMenu:
+                        Toast.makeText(getContext(), "play menu clicked", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "onMenuItemClick: play menu clicked ");
                         onMediaSelected(postion);
                         return true;
                     case R.id.deleteMenu:
                         Log.d(TAG, "onMenuItemClick: delete menu  clicked ");
+                        Toast.makeText(getContext(), "delete menu  clicked", Toast.LENGTH_SHORT).show();
                         deleteSongFromList(postion);
-                        return true;
-                    case R.id.addToPlaylistMenu:
-                        Log.d(TAG, "onMenuItemClick: add to playlist menu clicked song:"+songsList.get(postion).getNameSong());
-                        mIMainActivity.onAddPlaylistMenuSelected(songsList.get(postion));
                         return true;
                     case R.id.addAsFavorite:
                         Log.d(TAG, "onMenuItemClick: add to Favorite menu  clicked ");
+                        Toast.makeText(getContext(), "add to Favorite menu  clicked", Toast.LENGTH_SHORT).show();
                         mIMainActivity.addSongToPlaylist(songsList.get(postion),"Favorite");
-                        return true;
-                    case R.id.addToQueue:
-                        Log.d(TAG, "onMenuItemClick: Add to queue menu  clicked ");
-                        mIMainActivity.addSongToPlaylist(songsList.get(postion),"Queue");
                         return true;
 
                     default:
@@ -222,7 +209,6 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
                 return;
             }
         }
-        Log.d(TAG, "addSongToList: we add the song");
         File file = new File(song.getFileSong());
 
         MediaMetadataCompat media = new MediaMetadataCompat.Builder()
@@ -232,8 +218,6 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
                 .build();
         mMediaList.add(media);
         songsList.add(song);
-        // need to update database
-        mIMainActivity.updateToDatabase(mPlaylistFragment);
         updateDataSet();
     }
     private   void deleteSongFromList(int position)
@@ -241,16 +225,14 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
         // need to be change just don't want to make crush
         if(songsList.size() == 1)
         {
-          mIMainActivity.removePlaylistFromDatabase(mPlaylistFragment);
+          mIMainActivity.removePlaylistFragment(mPlaylistFragment);
         }
-
         else
         {
             MediaMetadataCompat theMediaToRemove = mMediaList.get(position);
             songsList.remove(position);
             mMediaList.remove(position);
             mIMainActivity.removeSongFromQueueList(theMediaToRemove);
-            mIMainActivity.updateToDatabase(mPlaylistFragment);
             updateDataSet();
         }
     }
@@ -265,12 +247,9 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
             {
                 File file = new File(songsList.get(i).getFileSong());
                 MediaMetadataCompat media = new MediaMetadataCompat.Builder()
-                        // title = songName , artist=songTime
                         .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
                         .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
-//                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
                         .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
-//                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
                         .build();
                 mMediaList.add(media);
             }
@@ -289,36 +268,5 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("selected_index",mAdapter.getSelectedIndex());
-    }
-
-    private  void savePlaylistToDatabase()
-    {
-        Log.d(TAG, "savePlaylistToDatabase: we try to save the playlist to the database");
-        Log.d(TAG, "savePlaylistToDatabase: Title: "+mPlaylistTitle+" Songs size: "+songsList.size());
-//        mPlaylistRepository.insertPlaylistTask(mPlaylistFragment);
-        mIMainActivity.insertToDatabase(mPlaylistFragment);
-
-//        ArrayList<String> playlistTitles = new ArrayList<>();
-////        playlistTitles.addAll(mPlaylistRepository.getPlaylistTitles());
-//        if( isThisNewPlaylist(mPlaylistFragment,playlistTitles) == true)
-//        {
-//            Log.d(TAG, "savePlaylistToDatabase: we insert new Playlist");
-//            mPlaylistRepository.insertPlaylistTask(new Playlist(mPlaylistTitle,songsList));
-//        }
-//        else
-//        {
-//            Log.d(TAG, "savePlaylistToDatabase: this playlist :"+mPlaylistFragment.getTitle() +" are already in database");
-//        }
-    }
-    public boolean isThisNewPlaylist(Playlist playlist,ArrayList<String> titles)
-    {
-        for(int i = 0; i<titles.size(); i++)
-        {
-            if(titles.get(i).equals(playlist.getTitle()))
-            {
-                return false;
-            }
-        }
-        return true;
     }
 }

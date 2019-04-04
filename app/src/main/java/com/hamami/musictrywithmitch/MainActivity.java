@@ -23,7 +23,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.hamami.musictrywithmitch.Models.Playlist;
@@ -35,8 +34,8 @@ import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelperCallback;
 import com.hamami.musictrywithmitch.ui.MediaControllerFragment;
 import com.hamami.musictrywithmitch.ui.PlaylistFragment;
+import com.hamami.musictrywithmitch.ui.QueueFragment;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements
     private static final String[] STORAGE_PERMISSIONS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
 
     // layout
     private TabLayout mTabLayout;
@@ -81,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements
       private boolean mOnAppOpen;
       private boolean mWasConfigurationChanged = false;
       private boolean isNewPlaylist;
+      private boolean mOnStartCalled;
 
       // Repository object
       private PlaylistRepository mPlaylistRepository;
@@ -144,58 +143,7 @@ public class MainActivity extends AppCompatActivity implements
         setupViewPager();
         mTabLayout.setupWithViewPager(mViewPager);
 
-
-//        setupViewPager(mViewPager);
-//        mTabLayout.setupWithViewPager(mViewPager);
-//
-//        ArrayList<Song> songList2 = new ArrayList<>();
-//        ArrayList<Songs> songList2 = new ArrayList<>();
-//
-//
-//        for (int i = 0; i < mySongs.size()-1; i++) {
-//            Songs song = new Songs(
-//                    mySongs.get(i).getAbsolutePath(),
-//                    mySongs.get(i).getName().replace(".mp3",""),
-//                    getTimeSong(mySongs.get(i))
-//            );
-//            songList2.add(song);
-//        }
-//
-//        viewPagerAdapter.addFragment(PlaylistFragment.newInstance(songList2,"3Songs"),"3songs");
-//        viewPagerAdapter.notifyDataSetChanged();
-//
-//         get from repository
-//
-//        Log.d(TAG, "onCreate: We trying geting information database");
-//        getPlaylistFromDatabase();
-//
-//
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                Log.d(TAG, "onClickButton: We trying geting information database after on Click");
-//                getPlaylistFromDatabase();
-//                addFromTabDatabase();
-//            }
-//        });
     }
-//    private void  getPlaylistFromDatabase()
-//    {
-//        Log.d(TAG, "getPlaylistFromDatabase: Called");
-////        mPlaylists.addAll(mPlaylistRepository.getPlaylistAsArrayList());
-//        mPlaylistRepository.retrievePlaylistsTask().observe(this, new Observer<List<Playlist>>() {
-//
-//            @Override
-//            public void onChanged(@Nullable List<Playlist> playlists)
-//            {
-//                Log.d(TAG, "onChanged: FromDataBase");
-//                mPlaylists.clear();
-//                mPlaylists.addAll(playlists);
-//                addTheFragmentsFromDataBase();
-//            }
-//        });
-//    }
 
     private void addTheFragmentsFromDataBase()
     {
@@ -303,6 +251,18 @@ public class MainActivity extends AppCompatActivity implements
         mMediaBrowserHelper.removeQueueItemFromPlaylist(mediaId);
 
     }
+
+    @Override
+    public void removePlaylistFragment(Playlist playlist)
+    {
+        Log.d(TAG, "removePlaylistFragment: we trying to remove");
+        PlaylistFragment playlistFragment = (PlaylistFragment) viewPagerAdapter.getFragments().get(viewPagerAdapter.getItemPositionByTitle(playlist.getTitle()));
+        Log.d(TAG, "removePlaylistFragment: the fragment is? :"+playlistFragment);
+        viewPagerAdapter.removeFragment(playlistFragment,playlist.getTitle());
+        viewPagerAdapter.notifyDataSetChanged();
+        mViewPager.setCurrentItem(0);
+    }
+
     @Override
     public void playPause()
     {
@@ -487,10 +447,30 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void addSongToPlaylist(Songs song, String playlist) {
+    public void addSongToPlaylist(Songs song, String playlistTitle) {
         Log.d(TAG, "addSongToPlaylist: Called");
-        ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlist))).addSongToList(song);
-        int position = viewPagerAdapter.getItemPositionByTitle(playlist);
+        if(playlistTitle.equals("Queue"))
+        {
+            Log.d(TAG, "addSongToPlaylist: we try add to queue list");
+            if(viewPagerAdapter.getItemPositionByTitle(playlistTitle) != -1)
+            {
+                ((QueueFragment)(viewPagerAdapter.getItemByTitle(playlistTitle))).addSongToList(song);
+            }
+            else
+            {
+                ArrayList<Songs> newSongList = new ArrayList<>();
+                newSongList.add(song);
+                viewPagerAdapter.addFragment(QueueFragment.newInstance(new Playlist(playlistTitle,newSongList)),playlistTitle);
+                viewPagerAdapter.notifyDataSetChanged();
+            }
+
+        }
+        else
+        {
+            ((PlaylistFragment)(viewPagerAdapter.getItemByTitle(playlistTitle))).addSongToList(song);
+        }
+
+        int position = viewPagerAdapter.getItemPositionByTitle(playlistTitle);
         mViewPager.setCurrentItem(position);
     }
 
@@ -541,7 +521,7 @@ public class MainActivity extends AppCompatActivity implements
     public void removePlaylistFromDatabase(Playlist playlist) 
     {
         Log.d(TAG, "removePlaylistFromDatabase: we trying to remove");
-        PlaylistFragment playlistFragment = viewPagerAdapter.getFragments().get(viewPagerAdapter.getItemPositionByTitle(playlist.getTitle()));
+        PlaylistFragment playlistFragment = (PlaylistFragment) viewPagerAdapter.getFragments().get(viewPagerAdapter.getItemPositionByTitle(playlist.getTitle()));
         Log.d(TAG, "removePlaylistFromDatabase: the fragment is? :"+playlistFragment);
         mPlaylistRepository.deletePlaylist(playlist);
         viewPagerAdapter.removeFragment(playlistFragment,playlist.getTitle());
@@ -575,10 +555,10 @@ public class MainActivity extends AppCompatActivity implements
 
     private void preparedLastPlayedMedia()
     {
-        // he get data from firebase to get last media and all media.
         Log.d(TAG, "preparedLastPlayedMedia: Called");
 
         String lastPlaylist = getMyPreferenceManager().getPlaylistId();
+        Log.d(TAG, "preparedLastPlayedMedia: lastPlayed is: "+lastPlaylist);
         int position = -1;
         for ( int i =0; i<mPlaylists.size(); i++)
         {
@@ -791,17 +771,15 @@ public class MainActivity extends AppCompatActivity implements
 
     private void addToMediaList(ArrayList<Songs> songsList)
     {
+        mMediaList.clear();
         for (int i=0;i<songsList.size();i++)
         {
             // for the new Songs Type
             File file = new File(songsList.get(i).getFileSong());
             MediaMetadataCompat media = new MediaMetadataCompat.Builder()
-                    // title = songName , artist=songTime
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,songsList.get(i).getNameSong())
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE,songsList.get(i).getNameSong())
-//                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songsList.get(i).getSongLength())
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
-//                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,songsList.get(i).getFileSong().toURI().toString())
                     .build();
             mMediaList.add(media);
         }

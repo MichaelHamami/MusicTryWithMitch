@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     private static final String TAG = "ViewPagerAdapter";
 
-    private ArrayList<PlaylistFragment> mFragments = new ArrayList<>();
+    private ArrayList<Fragment> mFragments = new ArrayList<>();
     private ArrayList<String> mTitleTabs = new ArrayList<>();
 
 
@@ -22,13 +22,13 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     super(fm);
     }
 
-    public ViewPagerAdapter(FragmentManager fm,ArrayList<PlaylistFragment> fragments,ArrayList<String> titleTabs) {
+    public ViewPagerAdapter(FragmentManager fm,ArrayList<Fragment> fragments,ArrayList<String> titleTabs) {
         super(fm);
         mFragments = fragments;
        mTitleTabs = titleTabs;
     }
 
-    public ArrayList<PlaylistFragment> getFragments() {
+    public ArrayList<Fragment> getFragments() {
         return mFragments;
     }
 
@@ -36,12 +36,12 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         return mTitleTabs;
     }
 
-    public void addFragment(PlaylistFragment fragment, String title)
+    public void addFragment(Fragment fragment, String title)
     {
         mFragments.add(fragment);
         mTitleTabs.add(title);
     }
-    public void removeFragment(PlaylistFragment fragment, String title)
+    public void removeFragment(Fragment fragment, String title)
     {
         mFragments.remove(fragment);
         mTitleTabs.remove(title);

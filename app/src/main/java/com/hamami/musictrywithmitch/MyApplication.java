@@ -32,13 +32,15 @@ public class MyApplication extends Application {
         for(MediaMetadataCompat item: mediaItems)
         {
             Log.d(TAG, "setMediaItems: called: adding media item: " + item.getDescription());
+            MediaBrowserCompat.MediaItem theItem = new MediaBrowserCompat.MediaItem(
+                    item.getDescription(),MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
 
-            mMediaItems.add(
-                    new MediaBrowserCompat.MediaItem(
-                            item.getDescription(),MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
-                    )
-            );
-            mTreeMap.put(item.getDescription().getMediaId(),item);
+//            if(!mMediaItems.contains(theItem))
+//            {
+//                Log.d(TAG, "setMediaItems: the item is not allredy in mMedialist");
+                mMediaItems.add(theItem);
+                mTreeMap.put(item.getDescription().getMediaId(),item);
+//            }
         }
     }
 

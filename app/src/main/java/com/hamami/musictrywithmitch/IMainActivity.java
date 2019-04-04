@@ -22,7 +22,7 @@ public interface IMainActivity {
 
     void onAddPlaylistMenuSelected(Songs songSelected);
 
-    void addSongToPlaylist(Songs song,String playlist);
+    void addSongToPlaylist(Songs song,String playlistTitle);
 
     MyPreferenceManager getMyPreferenceManager();
 
@@ -33,5 +33,7 @@ public interface IMainActivity {
     void removePlaylistFromDatabase(Playlist playlist);
 
     void removeSongFromQueueList(MediaMetadataCompat mediaId);
+
+    void removePlaylistFragment(Playlist playlist);
 
 }

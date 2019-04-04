@@ -9,6 +9,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import com.hamami.musictrywithmitch.util.MyPreferenceManager;
+
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ public class MediaBrowserHelper {
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
+    private MyPreferenceManager mMyPrefManager;
 
     private MediaBrowserConnectionCallback mMediaBrowserConnectionCallback;
     private MediaBrowserSubscriptionCallBack mMediaBrowserSubscriptionCallBack;
@@ -39,6 +42,7 @@ public class MediaBrowserHelper {
         mMediaBrowserConnectionCallback = new MediaBrowserConnectionCallback();
         mMediaBrowserSubscriptionCallBack = new MediaBrowserSubscriptionCallBack();
         mMediaControllerCallback = new MediaControllerCallback();
+        mMyPrefManager = new MyPreferenceManager(context);
     }
 
     public void setMediaBrowserHelperCallback(MediaBrowserHelperCallback mediaBrowserHelperCallback)
