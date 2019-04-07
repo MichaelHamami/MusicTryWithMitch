@@ -42,7 +42,7 @@ public class QueueFragment extends Fragment implements QueuePlaylistRecyclerAdap
     private String mPlaylistTitle;
     private QueuePlaylistRecyclerAdapter mAdapter;
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Songs> songsList = new ArrayList<>();
+    private ArrayList<Songs> mSongsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
     private MediaMetadataCompat mSelectedMedia;
     private boolean mIsPlaylistInDatabase;
@@ -68,13 +68,13 @@ public static QueueFragment newInstance(Playlist playlist){
         super.onCreate(savedInstanceState);
         if (getArguments() != null){
             Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
-            if (songsList.size() ==0)
+            if (mSongsList.size() ==0)
             {
                 Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
-                songsList = getArguments().getParcelableArrayList("songLists");
-                addToMediaList(songsList);
+                mSongsList = getArguments().getParcelableArrayList("songLists");
+                addToMediaList(mSongsList);
                 mPlaylistTitle = getArguments().getString("title");
-                mPlaylistFragment = new Playlist(mPlaylistTitle,songsList);
+                mPlaylistFragment = new Playlist(mPlaylistTitle,mSongsList);
             }
             setRetainInstance(true);
         }
@@ -121,8 +121,8 @@ public static QueueFragment newInstance(Playlist playlist){
     {
             mRecyclerView = view.findViewById(R.id.reycler_view);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            mAdapter = new QueuePlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
-            Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" and MediaList size is:" +mMediaList.size());
+            mAdapter = new QueuePlaylistRecyclerAdapter(getActivity(),mSongsList,mMediaList,this);
+            Log.d(TAG, "initRecyclerView: called , Song list size is:"+mSongsList.size()+" and MediaList size is:" +mMediaList.size());
             mRecyclerView.setAdapter(mAdapter);
 
             ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
@@ -174,6 +174,16 @@ public static QueueFragment newInstance(Playlist playlist){
         mItemTouchHelper.startDrag(viewHolder);
     }
 
+    @Override
+    public void onFinishedDrag(ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mediaList)
+    {
+        mMediaList.clear();
+        mSongsList.clear();
+        mMediaList = mediaList;
+        mSongsList = songsList;
+        mAdapter.notifyDataSetChanged();
+    }
+
     public void showPopup(final int postion, View view){
         PopupMenu popup = new PopupMenu(getContext(), view);
         popup.inflate(R.menu.queue_options_menu);
@@ -195,7 +205,7 @@ public static QueueFragment newInstance(Playlist playlist){
                     case R.id.addAsFavorite:
                         Log.d(TAG, "onMenuItemClick: add to Favorite menu  clicked ");
                         Toast.makeText(getContext(), "add to Favorite menu  clicked", Toast.LENGTH_SHORT).show();
-                        mIMainActivity.addSongToPlaylist(songsList.get(postion),"Favorite");
+                        mIMainActivity.addSongToPlaylist(mSongsList.get(postion),"Favorite");
                         return true;
 
                     default:
@@ -216,9 +226,9 @@ public static QueueFragment newInstance(Playlist playlist){
     public  void addSongToList(Songs song)
     {
         // check for duplicates
-        for(int i=0; i<songsList.size();i++)
+        for(int i=0; i<mSongsList.size();i++)
         {
-            if(songsList.get(i).getNameSong().equals(song.getNameSong()))
+            if(mSongsList.get(i).getNameSong().equals(song.getNameSong()))
             {
                 Toast.makeText(getContext(), "the song is already in the playlist ", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "addSongToList: the song is already in the playlist");
@@ -233,20 +243,20 @@ public static QueueFragment newInstance(Playlist playlist){
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
                 .build();
         mMediaList.add(media);
-        songsList.add(song);
+        mSongsList.add(song);
         updateDataSet();
     }
     private   void deleteSongFromList(int position)
     {
         // need to be change just don't want to make crush
-        if(songsList.size() == 1)
+        if(mSongsList.size() == 1)
         {
           mIMainActivity.removePlaylistFragment(mPlaylistFragment);
         }
         else
         {
             MediaMetadataCompat theMediaToRemove = mMediaList.get(position);
-            songsList.remove(position);
+            mSongsList.remove(position);
             mMediaList.remove(position);
             mIMainActivity.removeSongFromQueueList(theMediaToRemove);
             updateDataSet();

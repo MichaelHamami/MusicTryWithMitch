@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.util.ItemTouchHelperViewHolder;
@@ -28,7 +29,7 @@ implements ItemTouchHelperAdapter {
     private static final String TAG = "QueueRecyclerAdapter";
 
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Songs> songsList = new ArrayList<>();
+    private ArrayList<Songs> mSongsList = new ArrayList<>();
     private Context mContext;
     private IMediaSelector mIMediaSelector;
     private int mSelectedIndex;
@@ -37,7 +38,7 @@ implements ItemTouchHelperAdapter {
     {
         Log.d(TAG, "QueueRecyclerAdapter: called.");
         this.mMediaList = mMediaList;
-        this.songsList = songsList;
+        this.mSongsList = songsList;
         this.mContext = context;
         this.mIMediaSelector = mediaSelector;
         mSelectedIndex = -1;
@@ -58,7 +59,7 @@ implements ItemTouchHelperAdapter {
 //         ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
 
         ((ViewHolder)viewHolder).songName.setText(mMediaList.get(i).getDescription().getTitle());
-        ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
+        ((ViewHolder)viewHolder).songTime.setText(mSongsList.get(i).getSongLength());
         ((ViewHolder)viewHolder).handleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,7 +76,7 @@ implements ItemTouchHelperAdapter {
 
     @Override
     public int getItemCount() {
-        return songsList.size();
+        return mSongsList.size();
     }
 
     public void setSelectedIndex(int index){
@@ -99,9 +100,10 @@ implements ItemTouchHelperAdapter {
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         Log.d(TAG, "onItemMove: called");
-        Collections.swap(songsList, fromPosition, toPosition);
+        Collections.swap(mSongsList, fromPosition, toPosition);
         Collections.swap(mMediaList, fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
+        Log.d(TAG, "onItemMove: moved?");
         return true;
     }
 
@@ -152,6 +154,8 @@ implements ItemTouchHelperAdapter {
 
         @Override
         public void onItemClear() {
+            Log.d(TAG, "onItemClear: finished to move?");
+            mIMediaSelector.onFinishedDrag(mSongsList,mMediaList);
             itemView.setBackgroundColor(0);
         }
     }
@@ -160,6 +164,7 @@ implements ItemTouchHelperAdapter {
         void onMediaSelected(int position);
         void onSongOptionSelected(int position, View view);
         void onStartDrag(RecyclerView.ViewHolder viewHolder);
+        void onFinishedDrag(ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mMediaList);
     }
 
 }
