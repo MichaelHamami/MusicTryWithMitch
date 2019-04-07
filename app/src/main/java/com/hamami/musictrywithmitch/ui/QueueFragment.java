@@ -16,7 +16,9 @@ import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
+import com.hamami.musictrywithmitch.adapters.QueuePlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
+import com.hamami.musictrywithmitch.util.SimpleItemTouchHelperCallback;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,10 +26,11 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class QueueFragment extends Fragment implements PlaylistRecyclerAdapter.IMediaSelector
+public class QueueFragment extends Fragment implements QueuePlaylistRecyclerAdapter.IMediaSelector
 {
     private static final String TAG = "QueueFragment";
 
@@ -37,7 +40,7 @@ public class QueueFragment extends Fragment implements PlaylistRecyclerAdapter.I
     //Vars
     // the title we will get from bundle
     private String mPlaylistTitle;
-    private PlaylistRecyclerAdapter mAdapter;
+    private QueuePlaylistRecyclerAdapter mAdapter;
     private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
     private ArrayList<Songs> songsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
@@ -45,8 +48,9 @@ public class QueueFragment extends Fragment implements PlaylistRecyclerAdapter.I
     private boolean mIsPlaylistInDatabase;
     private Playlist mPlaylistFragment;
 
-    // Repository
-    private PlaylistRepository mPlaylistRepository;
+    // Touch Helper
+//    private PlaylistRepository mPlaylistRepository;
+    private ItemTouchHelper mItemTouchHelper;
 
 //    public static PlaylistFragment newInstance(ArrayList<Songs> songsArray,String title){
 public static QueueFragment newInstance(Playlist playlist){
@@ -117,9 +121,14 @@ public static QueueFragment newInstance(Playlist playlist){
     {
             mRecyclerView = view.findViewById(R.id.reycler_view);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            mAdapter = new PlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
+            mAdapter = new QueuePlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
             Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" and MediaList size is:" +mMediaList.size());
             mRecyclerView.setAdapter(mAdapter);
+
+            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+
 
             updateDataSet();
 
@@ -158,9 +167,16 @@ public static QueueFragment newInstance(Playlist playlist){
         Log.d(TAG, "onSongOptionSelected: you clicked on menu good job");
         showPopup(position,view);
     }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder)
+    {
+        mItemTouchHelper.startDrag(viewHolder);
+    }
+
     public void showPopup(final int postion, View view){
         PopupMenu popup = new PopupMenu(getContext(), view);
-        popup.inflate(R.menu.options_menu);
+        popup.inflate(R.menu.queue_options_menu);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
         {
             @Override
