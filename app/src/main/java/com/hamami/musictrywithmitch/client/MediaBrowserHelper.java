@@ -90,6 +90,11 @@ public class MediaBrowserHelper {
         Log.d(TAG, "subscribeToNewPlaylist: mMediaBrowser is : "+mMediaBrowser);
         mMediaBrowser.subscribe(newPlaylistId,mMediaBrowserSubscriptionCallBack);
     }
+    public void addQueueItemFromPlaylist(MediaMetadataCompat mediaId)
+    {
+        Log.d(TAG, "addQueueItemFromPlaylist: Called we call controller to add: "+mediaId.getDescription().getMediaId());
+        mMediaController.addQueueItem(mediaId.getDescription());
+    }
     public void removeQueueItemFromPlaylist(MediaMetadataCompat mediaId)
     {
         Log.d(TAG, "removeQueueItemFromPlaylist: Called we call controller to remove");

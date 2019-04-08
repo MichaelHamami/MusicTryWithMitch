@@ -15,7 +15,7 @@ import androidx.room.TypeConverters;
 
 public abstract class PlaylistDatabase extends RoomDatabase {
 
-    public static final String DATABASE_NAME = "playlists13_db";
+    public static final String DATABASE_NAME = "playlists14_db";
 
     private static PlaylistDatabase instance;
 

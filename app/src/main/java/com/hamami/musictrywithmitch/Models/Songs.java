@@ -58,6 +58,13 @@ public class Songs implements Parcelable {
         dest.writeString(nameSong);
         dest.writeString(SongLength);
     }
+
+    @Override
+    public String toString() {
+        return
+                "file: " + fileSongPath +
+                ", name: " + nameSong;
+    }
 }
 
 
