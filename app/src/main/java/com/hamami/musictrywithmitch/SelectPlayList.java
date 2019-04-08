@@ -117,4 +117,11 @@ public class SelectPlayList extends AppCompatActivity implements SelectPlaylistR
         }
         return false;
     }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed: called");
+        setResult(3);
+        finish();
+    }
 }

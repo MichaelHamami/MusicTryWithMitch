@@ -433,7 +433,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==4){
+        // was request code before
+        if (resultCode==4){
             Log.d(TAG, "onActivityResult: Called:");
             // code here when they back
             //Check if it is new playlist
