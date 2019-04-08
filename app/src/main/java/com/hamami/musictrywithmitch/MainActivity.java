@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.MediaMetadataRetriever;
+import android.media.browse.MediaBrowser;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -264,6 +265,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList)
+    {
+        Log.d(TAG, "onFinishedDragInQueueFragment: called : songs size: "+mediaList.size());
+        mMyApplication.setMediaItems(mediaList);
+        mMediaBrowserHelper.setQueueItemsFromPlaylist(mediaList);
+    }
+
+    @Override
     public void playPause()
     {
         Log.d(TAG, "playPause: called");
@@ -488,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
+
     public MyPreferenceManager getMyPreferenceManager() {
         return mMyPrefManager;
     }

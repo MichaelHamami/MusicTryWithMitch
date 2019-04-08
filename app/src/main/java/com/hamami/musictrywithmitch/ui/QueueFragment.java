@@ -177,11 +177,15 @@ public static QueueFragment newInstance(Playlist playlist){
     @Override
     public void onFinishedDrag(ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mediaList)
     {
-        mMediaList.clear();
-        mSongsList.clear();
-        mMediaList = mediaList;
-        mSongsList = songsList;
-        mAdapter.notifyDataSetChanged();
+        Log.d(TAG, "onFinishedDrag: Song list we get size is: "+songsList.size()+" and MediaList we get size is: " +mediaList.size());
+//        mPlaylistFragment.getSongs().clear();
+//        mMediaList.clear();
+//        mSongsList.clear();
+//        mMediaList.addAll(mediaList);
+//        mSongsList.addAll(songsList);
+//        mPlaylistFragment.setSongs(songsList);
+//        mAdapter.notifyDataSetChanged();
+        mIMainActivity.onFinishedDragInQueueFragment(mediaList);
     }
 
     public void showPopup(final int postion, View view){

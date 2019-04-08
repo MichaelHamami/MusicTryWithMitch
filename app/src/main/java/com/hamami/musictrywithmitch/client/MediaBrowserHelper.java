@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -93,6 +94,17 @@ public class MediaBrowserHelper {
     {
         Log.d(TAG, "removeQueueItemFromPlaylist: Called we call controller to remove");
         mMediaController.removeQueueItem(mediaId.getDescription());
+    }
+    public void  setQueueItemsFromPlaylist(ArrayList<MediaMetadataCompat> mediaList)
+    {
+        for(int i=0;i<mMediaController.getQueue().size();i++)
+        {
+            mMediaController.removeQueueItem(mMediaController.getQueue().get(i).getDescription());
+        }
+        for(int j=0;j<mediaList.size();j++)
+        {
+            mMediaController.addQueueItem(mediaList.get(j).getDescription());
+        }
     }
 
     public void onStart(boolean wasConfigurationChanged)

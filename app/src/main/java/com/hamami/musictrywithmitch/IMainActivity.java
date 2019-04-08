@@ -6,6 +6,8 @@ import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
+import java.util.ArrayList;
+
 
 public interface IMainActivity {
 
@@ -35,5 +37,8 @@ public interface IMainActivity {
     void removeSongFromQueueList(MediaMetadataCompat mediaId);
 
     void removePlaylistFragment(Playlist playlist);
+//    void onFinishedDragInQueueFragment(Playlist playlist, ArrayList<MediaMetadataCompat> medialist);
+void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList);
+
 
 }
