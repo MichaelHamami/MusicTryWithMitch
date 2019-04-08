@@ -487,6 +487,7 @@ public class MainActivity extends AppCompatActivity implements
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,file.toURI().toString())
                 .build();
         mMediaBrowserHelper.onStart(mWasConfigurationChanged);
+        ///something
 //        mMediaBrowserHelper.addQueueItemFromPlaylist(media);
         int position = viewPagerAdapter.getItemPositionByTitle(playlistTitle);
         mViewPager.setCurrentItem(position);
