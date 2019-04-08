@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements
       private ArrayList<Playlist> mPlaylists;
       private Button button;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -269,7 +267,19 @@ public class MainActivity extends AppCompatActivity implements
     {
         Log.d(TAG, "onFinishedDragInQueueFragment: called : songs size: "+mediaList.size());
         mMyApplication.setMediaItems(mediaList);
+
+        String lastNameSong = mMyPrefManager.getLastPlayedMedia();
+        int position = 0;
+        for(int i= 0; i<mediaList.size();i++)
+        {
+            if(lastNameSong.equals(mediaList.get(i).getDescription().getMediaId()))
+            {
+                position = i;
+            }
+        }
+        Log.d(TAG, "onFinishedDragInQueueFragment: the new position is : "+position);
         mMediaBrowserHelper.setQueueItemsFromPlaylist(mediaList);
+        mMyPrefManager.saveQueuePosition(position);
     }
 
     @Override
@@ -726,12 +736,26 @@ public class MainActivity extends AppCompatActivity implements
         public void onReceive(Context context, Intent intent) {
             String mediaID = intent.getStringExtra(getString(R.string.broadcast_new_media_id));
             Log.d(TAG, "onReceive:  media id: "+mediaID);
-            if(getPlaylistFragment() != null)
+//            if(getPlaylistFragment() != null)
+//            {
+//                getPlaylistFragment().updateUI(mMyApplication.getMediaItem(mediaID));
+//            }
+//            mViewPager.
+           int fragmentPosition = mTabLayout.getSelectedTabPosition();
+            Log.d(TAG, "onReceive: position: "+fragmentPosition);
+//           if(mTabLayout.getTabAt(fragmentPosition).getTag().equals("queue") || mTabLayout.getTabAt(fragmentPosition).getTag().equals("QUEUE"))
+            Log.d(TAG, "onReceive: class:  "+viewPagerAdapter.getItem(fragmentPosition).getClass());
+            if(viewPagerAdapter.getItem(fragmentPosition).getClass().equals("class com.hamami.musictrywithmitch.ui.QueueFragment") ||
+                    viewPagerAdapter.getItem(fragmentPosition).getClass().equals("com.hamami.musictrywithmitch.ui.QueueFragment")
+            )
             {
-                getPlaylistFragment().updateUI(mMyApplication.getMediaItem(mediaID));
+                ((QueueFragment) (viewPagerAdapter.getItem(fragmentPosition))).updateUI(mMyApplication.getMediaItem(mediaID));
+
             }
-
-
+           else
+           {
+               ((PlaylistFragment) (viewPagerAdapter.getItem(fragmentPosition))).updateUI(mMyApplication.getMediaItem(mediaID));
+           }
         }
     }
 

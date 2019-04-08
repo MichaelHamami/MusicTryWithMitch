@@ -123,6 +123,10 @@ public class MediaService extends MediaBrowserServiceCompat
             mPlaylist.clear();
             mQueueIndex = -1;
         }
+        public void setQueueIndex(int queueIndex)
+        {
+            mQueueIndex = queueIndex;
+        }
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
@@ -234,6 +238,7 @@ public class MediaService extends MediaBrowserServiceCompat
             Log.d(TAG, "onPause: called");
             mPlayback.pause();
         }
+
 
         @Override
         public void onStop() {

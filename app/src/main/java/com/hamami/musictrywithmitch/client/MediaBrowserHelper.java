@@ -100,6 +100,10 @@ public class MediaBrowserHelper {
         Log.d(TAG, "removeQueueItemFromPlaylist: Called we call controller to remove");
         mMediaController.removeQueueItem(mediaId.getDescription());
     }
+    public void setQueueIndex(int index)
+    {
+
+    }
     public void  setQueueItemsFromPlaylist(ArrayList<MediaMetadataCompat> mediaList)
     {
         for(int i=0;i<mMediaController.getQueue().size();i++)
