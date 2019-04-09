@@ -710,19 +710,6 @@ public class MainActivity extends AppCompatActivity implements
             );
         }
     }
-
-
-    private PlaylistFragment getPlaylistFragment()
-    {
-        PlaylistFragment PlaylistFragment = (PlaylistFragment)getSupportFragmentManager()
-                .findFragmentByTag(getString(R.string.fragment_playlist));
-        if (PlaylistFragment != null)
-        {
-            Log.d(TAG, "getPlaylistFragment:  we get the playlistFragment");
-            return PlaylistFragment;
-        }
-        return null;
-    }
     private void initUpdateUiBroadcastReceiver()
     {
         IntentFilter intentFilter = new IntentFilter();
@@ -736,18 +723,11 @@ public class MainActivity extends AppCompatActivity implements
         public void onReceive(Context context, Intent intent) {
             String mediaID = intent.getStringExtra(getString(R.string.broadcast_new_media_id));
             Log.d(TAG, "onReceive:  media id: "+mediaID);
-//            if(getPlaylistFragment() != null)
-//            {
-//                getPlaylistFragment().updateUI(mMyApplication.getMediaItem(mediaID));
-//            }
-//            mViewPager.
            int fragmentPosition = mTabLayout.getSelectedTabPosition();
             Log.d(TAG, "onReceive: position: "+fragmentPosition);
-//           if(mTabLayout.getTabAt(fragmentPosition).getTag().equals("queue") || mTabLayout.getTabAt(fragmentPosition).getTag().equals("QUEUE"))
-            Log.d(TAG, "onReceive: class:  "+viewPagerAdapter.getItem(fragmentPosition).getClass());
-            if(viewPagerAdapter.getItem(fragmentPosition).getClass().equals("class com.hamami.musictrywithmitch.ui.QueueFragment") ||
-                    viewPagerAdapter.getItem(fragmentPosition).getClass().equals("com.hamami.musictrywithmitch.ui.QueueFragment")
-            )
+            String title = viewPagerAdapter.getPageTitle(fragmentPosition).toString();
+            Log.d(TAG, "onReceive: title? :"+title);
+            if(title.equalsIgnoreCase("queue"))
             {
                 ((QueueFragment) (viewPagerAdapter.getItem(fragmentPosition))).updateUI(mMyApplication.getMediaItem(mediaID));
 
