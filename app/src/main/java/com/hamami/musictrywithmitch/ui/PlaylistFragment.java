@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class PlaylistFragment extends Fragment implements PlaylistRecyclerAdapte
 
     // UI Components
     private RecyclerView mRecyclerView;
+    private ImageView mShuffle;
 
     //Vars
     // the title we will get from bundle
@@ -97,6 +99,14 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
         initRecyclerView(view);
+        mShuffle = view.findViewById(R.id.shuffle);
+        mShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mIMainActivity.shufflePlayingPlaylist();
+            }
+        });
+
 
         if(savedInstanceState != null)
         {

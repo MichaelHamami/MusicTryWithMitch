@@ -119,7 +119,7 @@ implements ItemTouchHelperAdapter {
 
         // title = songName , artist=songTime
         private TextView songName, songTime;
-        private TextView songOptions;
+        private ImageView songOptions;
         private IMediaSelector iMediaSelector;
         private final ImageView handleView;
 
@@ -127,8 +127,8 @@ implements ItemTouchHelperAdapter {
             super(itemView);
             songName = itemView.findViewById(R.id.song_name);
             songTime = itemView.findViewById(R.id.song_time);
-            songOptions = itemView.findViewById(R.id.song_option);
             handleView = (ImageView) itemView.findViewById(R.id.handle);
+            songOptions = itemView.findViewById(R.id.song_option);
             this.iMediaSelector = iMediaSelector;
 
             itemView.setOnClickListener(this);

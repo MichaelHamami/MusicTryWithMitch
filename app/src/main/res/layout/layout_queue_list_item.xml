@@ -36,16 +36,24 @@
             android:scaleType="center"
             android:src="@drawable/ic_reorder_grey_500_24dp" />
 
-        <TextView
+        <ImageView
             android:id="@+id/song_option"
             android:layout_width="30dp"
             android:layout_height="45dp"
             android:layout_marginStart="10dp"
-            android:text="&#8942;"
-            android:layout_gravity="center_vertical|right"
-            android:scaleType="center"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp" />
+            android:src="@drawable/dot_menu_more_vertical" />
+
+
+        <!--<TextView-->
+            <!--android:id="@+id/song_option"-->
+            <!--android:layout_width="30dp"-->
+            <!--android:layout_height="45dp"-->
+            <!--android:layout_marginStart="10dp"-->
+            <!--android:text="&#8942;"-->
+            <!--android:layout_gravity="center_vertical|right"-->
+            <!--android:scaleType="center"-->
+            <!--android:textColor="@color/colorPrimaryDark"-->
+            <!--android:textSize="16sp" />-->
 
 
     </LinearLayout>

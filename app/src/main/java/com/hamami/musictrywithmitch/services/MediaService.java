@@ -23,6 +23,7 @@ import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -117,6 +118,7 @@ public class MediaService extends MediaBrowserServiceCompat
         private final List<MediaSessionCompat.QueueItem> mPlaylist = new ArrayList<>();
         private int mQueueIndex = -1;
         private MediaMetadataCompat mPreparedMedia;
+        private boolean mIsShuffle = false;
 
         private void resetPlaylist(){
 //            mSetPlaylist.clear();
@@ -159,6 +161,18 @@ public class MediaService extends MediaBrowserServiceCompat
             mMyPrefManager.saveLastPlayedMedia(mPreparedMedia.getDescription().getMediaId());
 
 
+        }
+
+        @Override
+        public void onSetShuffleMode(int shuffleMode) {
+            if(shuffleMode == 1)
+            {
+                mIsShuffle = true;
+                Log.d(TAG, "onSetShuffleMode: isShuffle? : "+mIsShuffle);
+                return;
+            }
+            mIsShuffle = false;
+            Log.d(TAG, "onSetShuffleMode: isShuffle? : "+mIsShuffle);
         }
 
         @Override
@@ -252,10 +266,19 @@ public class MediaService extends MediaBrowserServiceCompat
         public void onSkipToNext() {
             Log.d(TAG,"onSkipToNext: SKIP TO NEXT");
             Log.d(TAG, "onSkipToNext: the queueIndex before is: "+mQueueIndex +" playlistSize is: "+mPlaylist.size());
-            mQueueIndex = (++mQueueIndex % mPlaylist.size());
+            if(mIsShuffle == false)
+            {
+                mQueueIndex = (++mQueueIndex % mPlaylist.size());
+            }
+            else
+            {
+                Log.d(TAG, "onSkipToNext: but shuffle is true so :");
+                mQueueIndex = new Random().nextInt(mPlaylist.size());
+            }
             Log.d(TAG,"onSkipToNext: queue index: "+mQueueIndex);
             mPreparedMedia = null;
             onPlay();
+
         }
 
         @Override

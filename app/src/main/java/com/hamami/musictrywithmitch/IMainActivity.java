@@ -38,7 +38,9 @@ public interface IMainActivity {
 
     void removePlaylistFragment(Playlist playlist);
 //    void onFinishedDragInQueueFragment(Playlist playlist, ArrayList<MediaMetadataCompat> medialist);
-void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList);
+    void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList);
+
+    void shufflePlayingPlaylist();
 
 
 }

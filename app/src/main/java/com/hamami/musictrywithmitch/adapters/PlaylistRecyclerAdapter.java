@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -90,7 +91,9 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         // title = songName , artist=songTime
         private TextView songName, songTime;
-        private TextView songOptions;
+//        private TextView songOptions;
+        private ImageView songOptions;
+
         private IMediaSelector iMediaSelector;
 
         public ViewHolder(@NonNull View itemView, IMediaSelector iMediaSelector) {

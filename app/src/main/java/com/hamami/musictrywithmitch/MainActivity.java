@@ -283,6 +283,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void shufflePlayingPlaylist()
+    {
+        Log.d(TAG, "shufflePlayingPlaylist: called we shuffle");
+        mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL);
+    }
+
+    @Override
     public void playPause()
     {
         Log.d(TAG, "playPause: called");
