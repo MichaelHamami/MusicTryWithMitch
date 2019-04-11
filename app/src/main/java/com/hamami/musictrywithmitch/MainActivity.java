@@ -22,7 +22,9 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements
     private ViewPager mViewPager;
     private ViewPagerAdapter viewPagerAdapter;
 
+    // UI Components
+    private ImageView mSettingToolbar;
+
     // Songs Vars
     ArrayList<Songs> songList = new ArrayList<>();
 
@@ -95,9 +100,18 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
 
+        mSettingToolbar = findViewById(R.id.setting_toolbar);
+
+
+
         mPlaylists = new ArrayList<>();
 
+        mSettingToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         mPlaylistRepository = new PlaylistRepository(this);
@@ -648,7 +662,8 @@ public class MainActivity extends AppCompatActivity implements
     private Playlist retrivePlaylistFromStorage()
     {
         ArrayList<File> songsFiles = new ArrayList<>();
-        songsFiles =  findSongs(Environment.getExternalStorageDirectory());
+//        songsFiles =  findSongs(Environment.getExternalStorageDirectory());
+        songsFiles =  findSongs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
         ArrayList<Songs> songsList = new ArrayList<>();
         for (int i = 0; i < songsFiles.size(); i++) {
             Songs song = new Songs(
