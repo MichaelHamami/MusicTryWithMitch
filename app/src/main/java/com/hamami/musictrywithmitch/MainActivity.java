@@ -1,8 +1,12 @@
 package com.hamami.musictrywithmitch;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 import android.Manifest;
@@ -22,10 +26,14 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.hamami.musictrywithmitch.Models.Playlist;
@@ -47,9 +55,11 @@ import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.QUEUE_NEW_PLAYLIST;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_MAX;
 import static com.hamami.musictrywithmitch.util.Constants.SEEK_BAR_PROGRESS;
+import static com.hamami.musictrywithmitch.util.Constants.ALL_MUSIC_FRAGMENT_TITLE;
+import static com.hamami.musictrywithmitch.util.Constants.QUEUE_FRAGMENT_TITLE;
 
 public class MainActivity extends AppCompatActivity implements
-        IMainActivity,
+        IMainActivity, NavigationView.OnNavigationItemSelectedListener,
         MediaBrowserHelperCallback {
     // Tag for debug
     private static final String TAG = "MainActivity";
@@ -66,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements
 
     // UI Components
     private ImageView mSettingToolbar;
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
 
     // Songs Vars
     ArrayList<Songs> songList = new ArrayList<>();
@@ -100,18 +113,21 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout =  findViewById(R.id.tabLayout);
         mViewPager = findViewById(R.id.main_container);
 
-        mSettingToolbar = findViewById(R.id.setting_toolbar);
+         mToolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(mToolbar);
 
+
+         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
 
         mPlaylists = new ArrayList<>();
-
-        mSettingToolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         mPlaylistRepository = new PlaylistRepository(this);
@@ -157,6 +173,46 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout.setupWithViewPager(mViewPager);
 
     }
+    @Override
+    public void onBackPressed() {
+
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//        return true;
+//    }
 
     private void addTheFragmentsFromDataBase()
     {

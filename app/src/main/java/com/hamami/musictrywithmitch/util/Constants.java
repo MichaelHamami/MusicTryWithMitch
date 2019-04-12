@@ -13,6 +13,11 @@ public class Constants {
     public static final String LAST_ARTIST = "LAST_ARTIST";
     public static final String SEEK_BAR_MAX = "SEEK_BAR_MAX";
 
+    public static final String ALL_MUSIC_FRAGMENT_TITLE = "AllMusic";
+    public static final String QUEUE_FRAGMENT_TITLE = "Queue";
+
+    public static final String MUSIC_ROOT_FOLDER = "MUSIC_ROOT_FOLDER";
+
 
 
 }

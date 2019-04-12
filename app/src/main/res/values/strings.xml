@@ -7,6 +7,13 @@
     <string name="fragment_category">CategoryFragment</string>
     <string name="fragment_playlist">PlaylistFragment</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
 
     <!-- Firestore collections -->
     <string name="collection_audio">Audio</string>
@@ -43,7 +50,7 @@
     <string name="label_previous">Previous track</string>
     <string name="label_next">Next track</string>
 
-
-
     <string name="categories">Categories</string>
+
+
 </resources>

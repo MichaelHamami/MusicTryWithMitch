@@ -9,6 +9,8 @@ import static com.hamami.musictrywithmitch.util.Constants.LAST_ARTIST;
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.NOW_PLAYING;
 import static com.hamami.musictrywithmitch.util.Constants.PLAYLIST_ID;
+import static com.hamami.musictrywithmitch.util.Constants.MUSIC_ROOT_FOLDER;
+
 
 public class MyPreferenceManager {
 
@@ -52,25 +54,34 @@ public class MyPreferenceManager {
 //    public String getLastPlayedArtistImage(){
 //        return  mPreferences.getString(LAST_ARTIST_IMAGE, "");
 //    }
-
-    public String getLastPlayedArtist(){
-        return  mPreferences.getString(LAST_ARTIST, "");
-    }
-
     public void saveLastPlayedMedia(String mediaId){
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(NOW_PLAYING, mediaId);
-        editor.apply();
-    }
+    SharedPreferences.Editor editor = mPreferences.edit();
+    editor.putString(NOW_PLAYING, mediaId);
+    editor.apply();
+}
 
     public String getLastPlayedMedia(){
         return mPreferences.getString(NOW_PLAYING, "");
     }
+    public String getLastPlayedArtist(){
+        return  mPreferences.getString(LAST_ARTIST, "");
+    }
+
 
 
     public void saveLastPlayedArtist(String artist){
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(LAST_ARTIST, artist);
         editor.apply();
+    }
+
+    public void saveLastRootMediaFolder(String root){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(MUSIC_ROOT_FOLDER, root);
+        editor.apply();
+    }
+
+    public String getLastRootMediaFolder(){
+        return mPreferences.getString(MUSIC_ROOT_FOLDER, "");
     }
 }
