@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void genData() {
         List<String> title = Arrays.asList("Features " , "Help","About");
-        List<String> childsFeature = Arrays.asList("Settings","Feature1","Feature2");
+        List<String> childsFeature = Arrays.asList("Settings","Change Music Folder","Feature2");
         List<String> childsHelp = Arrays.asList("Help1","Help2");
         List<String> childsAbout = Arrays.asList("About","Info","me","its good?");
 
@@ -262,6 +262,17 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
+        mExpandListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                String selectedItem = lstChild.get(lstTitle.get(groupPosition)).get(childPosition).toString();
+                Toast.makeText(getApplicationContext(),
+                        selectedItem + " clicked",
+                        Toast.LENGTH_SHORT).show();
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                return false;
+            }
+        });
     }
     private void setupDrawer()
     {
@@ -282,8 +293,6 @@ public class MainActivity extends AppCompatActivity implements
         };
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-
-
     }
 
     @Override
@@ -333,13 +342,6 @@ public class MainActivity extends AppCompatActivity implements
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
 
     private void addTheFragmentsFromDataBase()
     {
