@@ -30,6 +30,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
+import com.hamami.musictrywithmitch.adapters.CustomExpandableListView;
 import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 import com.hamami.musictrywithmitch.services.MediaService;
@@ -49,7 +52,10 @@ import com.hamami.musictrywithmitch.ui.QueueFragment;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
 import static com.hamami.musictrywithmitch.util.Constants.QUEUE_NEW_PLAYLIST;
@@ -77,8 +83,17 @@ public class MainActivity extends AppCompatActivity implements
     // UI Components
     private ImageView mSettingToolbar;
     private Toolbar mToolbar;
+
+    // FOR NavigationView
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private String mActivityTitle;
+
+    private ExpandableListView mExpandListView;
+    private ExpandableListAdapter mExpandAdapter;
+    private List<String> lstTitle;
+    private Map<String,List<String>> lstChild;
 
     // Songs Vars
     ArrayList<Songs> songList = new ArrayList<>();
@@ -105,6 +120,15 @@ public class MainActivity extends AppCompatActivity implements
       private ArrayList<Playlist> mPlaylists;
       private Button button;
 
+    public MainActivity() {
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -116,15 +140,28 @@ public class MainActivity extends AppCompatActivity implements
          mToolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(mToolbar);
 
-
          mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+         mActivityTitle = getTitle().toString();
+         mExpandListView = findViewById(R.id.nav_expended);
 
-         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
+//         View listHeaderView = getLayoutInflater().inflate(R.layout.nav_header_main,null,false);
+//         mExpandListView.addHeaderView(listHeaderView);
+
+        genData();
+        addDrawerItem();
+        setupDrawer();
+
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setHomeButtonEnabled(true);
+//        getSupportActionBar().setTitle("Hamami1");
+
+//        mDrawerToggle = new ActionBarDrawerToggle(
+//                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        mDrawerLayout.addDrawerListener(mDrawerToggle);
+//        mDrawerToggle.syncState();
+//
+//         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+//        mNavigationView.setNavigationItemSelectedListener(this);
 
 
         mPlaylists = new ArrayList<>();
@@ -173,6 +210,96 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout.setupWithViewPager(mViewPager);
 
     }
+
+    private void genData() {
+        List<String> title = Arrays.asList("Features " , "Help","About");
+        List<String> childsFeature = Arrays.asList("Settings","Feature1","Feature2");
+        List<String> childsHelp = Arrays.asList("Help1","Help2");
+        List<String> childsAbout = Arrays.asList("About","Info","me","its good?");
+
+        lstChild = new TreeMap<>();
+
+        lstChild.put(title.get(0),childsFeature);
+        lstChild.put(title.get(1),childsHelp);
+        lstChild.put(title.get(2),childsAbout);
+
+        lstTitle = new ArrayList<>(title);
+    }
+
+    private void addDrawerItem() {
+        mExpandAdapter = new CustomExpandableListView(this,lstTitle,lstChild);
+        mExpandListView.setAdapter(mExpandAdapter);
+        mExpandListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                // Toast.makeText(getApplicationContext(),
+                // "Group Clicked " + listDataHeader.get(groupPosition),
+                // Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+        // Listview Group expanded listener
+        mExpandListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                Toast.makeText(getApplicationContext(),
+                        lstTitle.get(groupPosition) + " Expanded",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Listview Group collasped listener
+        mExpandListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+
+            @Override
+            public void onGroupCollapse(int groupPosition) {
+                Toast.makeText(getApplicationContext(),
+                        lstTitle.get(groupPosition) + " Collapsed",
+                        Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+    private void setupDrawer()
+    {
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                invalidateOptionsMenu();
+            }
+        };
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.nav_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(mDrawerToggle.onOptionsItemSelected(item))
+            return true;
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onBackPressed() {
 
@@ -278,6 +405,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mWasConfigurationChanged = true;
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override

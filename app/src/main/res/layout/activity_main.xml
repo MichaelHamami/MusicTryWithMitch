@@ -67,7 +67,37 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:headerLayout="@layout/nav_header_main">
+        <!--app:menu="@menu/activity_main_drawer"-->
+
+        <ExpandableListView
+            android:id="@+id/nav_expended"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nav_header_height"
+            android:background="@color/grey"
+            android:dividerHeight="0dp" />
+
+    </com.google.android.material.navigation.NavigationView>
+
+
+    <!--<ExpandableListView-->
+        <!--android:id="@+id/nav_expended"-->
+        <!--android:divider="@color/green"-->
+        <!--android:dividerHeight="0.5dp"-->
+        <!--android:indicatorLeft="5dp"-->
+        <!--android:layout_width="235dp"-->
+        <!--android:layout_height="match_parent">-->
+
+    <!--</ExpandableListView>-->
+
+    <!--<com.google.android.material.navigation.NavigationView-->
+        <!--android:id="@+id/nav_view"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_gravity="start"-->
+        <!--android:fitsSystemWindows="true"-->
+        <!--app:headerLayout="@layout/nav_header_main"-->
+        <!--app:menu="@menu/activity_main_drawer" />-->
 
 </androidx.drawerlayout.widget.DrawerLayout>
