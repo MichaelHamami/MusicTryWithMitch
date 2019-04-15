@@ -272,8 +272,18 @@ public class MainActivity extends AppCompatActivity implements
                         Toast.LENGTH_SHORT).show();
                 if(selectedItem.equalsIgnoreCase("help1"))
                 {
-                    Log.d(TAG, "onChildClick: we try to send mail");
-                    composeEmail(new String[]{"hamami2010@gmail.com"},"test1");
+
+//                    composeEmail(new String[]{"hamami2010@gmail.com"},"test1");
+                    try {
+                        Log.d(TAG, "onChildClick: we try to send mail");
+                        GMailSender sender = new GMailSender("hamami2010@gmail.com", "z8joe9r2ef");
+                        sender.sendMail("This is Subject realy",
+                                "This is Body",
+                                "hamami2010@gmail.com",
+                                "hamami2010@gmail.com");
+                    } catch (Exception e) {
+                        Log.d(TAG, e.getMessage() + "error?");
+                    }
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
 
