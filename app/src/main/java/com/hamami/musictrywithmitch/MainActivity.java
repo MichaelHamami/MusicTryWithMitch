@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.MediaMetadataRetriever;
 import android.media.browse.MediaBrowser;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -269,7 +270,13 @@ public class MainActivity extends AppCompatActivity implements
                 Toast.makeText(getApplicationContext(),
                         selectedItem + " clicked",
                         Toast.LENGTH_SHORT).show();
+                if(selectedItem.equalsIgnoreCase("help1"))
+                {
+                    Log.d(TAG, "onChildClick: we try to send mail");
+                    composeEmail(new String[]{"hamami2010@gmail.com"},"test1");
+                }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
+
                 return false;
             }
         });
@@ -1037,6 +1044,16 @@ public class MainActivity extends AppCompatActivity implements
 //            }
 //        }
 //        return true;
+    }
+    public void composeEmail(String[] addresses, String subject) {
+        Log.d(TAG, "composeEmail: called");
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:hamami2010@gmail.com")); // only email apps should handle this
+//        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /**
