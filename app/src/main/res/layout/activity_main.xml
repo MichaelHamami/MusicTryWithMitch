@@ -17,7 +17,7 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp" >
+        android:layout_height="?attr/actionBarSize" >
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -29,24 +29,31 @@
         </androidx.appcompat.widget.Toolbar>
 
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabGravity="fill"
-            app:tabIndicatorColor="@color/green"
-            app:tabIndicatorHeight="4dp"
-            app:tabMode="scrollable"
-            app:tabTextColor="@android:color/white" />
+        <!--<com.google.android.material.tabs.TabLayout-->
+            <!--android:id="@+id/tabLayout"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--app:tabGravity="fill"-->
+            <!--app:tabIndicatorColor="@color/green"-->
+            <!--app:tabIndicatorHeight="4dp"-->
+            <!--app:tabMode="scrollable"-->
+            <!--app:tabTextColor="@android:color/white" />-->
 
     </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/main_container"
-            android:layout_width="match_parent"
-            android:layout_height="440dp"
-            android:layout_above="@id/bottom_media_controller">
-        </androidx.viewpager.widget.ViewPager>
+        <!--<androidx.viewpager.widget.ViewPager-->
+            <!--android:id="@+id/viewpager2"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="440dp"-->
+            <!--android:layout_above="@id/bottom_media_controller">-->
+        <!--</androidx.viewpager.widget.ViewPager>-->
+
+        <FrameLayout
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        android:layout_above="@id/bottom_media_controller">
+        </FrameLayout>
 
         <fragment
             android:id="@+id/bottom_media_controller"
@@ -80,24 +87,5 @@
 
     </com.google.android.material.navigation.NavigationView>
 
-
-    <!--<ExpandableListView-->
-        <!--android:id="@+id/nav_expended"-->
-        <!--android:divider="@color/green"-->
-        <!--android:dividerHeight="0.5dp"-->
-        <!--android:indicatorLeft="5dp"-->
-        <!--android:layout_width="235dp"-->
-        <!--android:layout_height="match_parent">-->
-
-    <!--</ExpandableListView>-->
-
-    <!--<com.google.android.material.navigation.NavigationView-->
-        <!--android:id="@+id/nav_view"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="start"-->
-        <!--android:fitsSystemWindows="true"-->
-        <!--app:headerLayout="@layout/nav_header_main"-->
-        <!--app:menu="@menu/activity_main_drawer" />-->
 
 </androidx.drawerlayout.widget.DrawerLayout>

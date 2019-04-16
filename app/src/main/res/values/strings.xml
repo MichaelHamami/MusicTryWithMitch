@@ -51,6 +51,8 @@
     <string name="label_next">Next track</string>
 
     <string name="categories">Categories</string>
+    <string name="fragment_main">MainFragment</string>
+
 
 
 </resources>

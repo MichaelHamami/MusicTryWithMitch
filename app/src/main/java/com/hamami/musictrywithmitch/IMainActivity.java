@@ -8,6 +8,8 @@ import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.util.ArrayList;
 
+import androidx.viewpager.widget.ViewPager;
+
 
 public interface IMainActivity {
 
@@ -42,5 +44,8 @@ public interface IMainActivity {
 
     void shufflePlayingPlaylist();
 
+    void  setupViewPager(ViewPager viewPager );
 
-}
+
+
+    }
