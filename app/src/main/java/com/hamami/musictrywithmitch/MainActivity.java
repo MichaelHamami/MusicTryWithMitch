@@ -43,6 +43,7 @@ import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.adapters.CustomExpandableListView;
 import com.hamami.musictrywithmitch.adapters.ViewPagerAdapter;
+import com.hamami.musictrywithmitch.async.SendMailAsyncTask;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
@@ -215,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements
     private void genData() {
         List<String> title = Arrays.asList("Features " , "Help","About");
         List<String> childsFeature = Arrays.asList("Settings","Change Music Folder","Feature2");
-        List<String> childsHelp = Arrays.asList("Help1","Help2");
-        List<String> childsAbout = Arrays.asList("About","Info","me","its good?");
+        List<String> childsHelp = Arrays.asList("Report to Developer","Help2");
+        List<String> childsAbout = Arrays.asList("About","Info");
 
         lstChild = new TreeMap<>();
 
@@ -270,21 +271,11 @@ public class MainActivity extends AppCompatActivity implements
                 Toast.makeText(getApplicationContext(),
                         selectedItem + " clicked",
                         Toast.LENGTH_SHORT).show();
-                if(selectedItem.equalsIgnoreCase("help1"))
+                if(selectedItem.equalsIgnoreCase("Report to Developer"))
                 {
+                    Log.d(TAG, "onChildClick: we try to send");
+                    new SendMailAsyncTask("the body style","the subject style? really?").execute();
 
-//                    composeEmail(new String[]{"hamami2010@gmail.com"},"test1");
-                    try {
-                        Log.d(TAG, "onChildClick: we try to send mail");
-                        GMailSender sender = new GMailSender("hamami2010@gmail.com", "z8joe9r2ef");
-                        sender.sendMail("This is Subject realy",
-                                "This is Body",
-                                "hamami2010@gmail.com",
-                                "hamami2010@gmail.com");
-                        //dasdasdas
-                    } catch (Exception e) {
-                        Log.d(TAG, e.getMessage() + "error?");
-                    }
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
 

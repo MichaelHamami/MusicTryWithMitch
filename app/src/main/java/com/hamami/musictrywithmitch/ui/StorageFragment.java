@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.Toast;
-
 import com.hamami.musictrywithmitch.IMainActivity;
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
@@ -18,10 +17,8 @@ import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.adapters.StorageRecyclerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
-
 import java.io.File;
 import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -58,16 +55,16 @@ public class StorageFragment extends Fragment implements StorageRecyclerAdapter.
             {
                 Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
                 songsList = getArguments().getParcelableArrayList("songLists");
-                addToMediaList(songsList);
+//                addToMediaList(songsList);
                 mPlaylistTitle = getArguments().getString("title");
                 mPlaylistFragment = new Playlist(mPlaylistTitle,songsList);
                 mIsPlaylistInDatabase = getArguments().getBoolean("isPlaylistInDatabase");
 
-                if(mIsPlaylistInDatabase == false)
-                {
-                    savePlaylistToDatabase();
-
-                }
+//                if(mIsPlaylistInDatabase == false)
+//                {
+//                    savePlaylistToDatabase();
+//
+//                }
             }
             setRetainInstance(true);
         }
