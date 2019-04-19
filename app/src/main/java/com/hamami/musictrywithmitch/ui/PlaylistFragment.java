@@ -65,9 +65,10 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: called , sizeList:" +songsList.size());
 //        mPlaylistRepository = new PlaylistRepository(getContext());
         if (getArguments() != null){
-            Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
+            Log.d(TAG, "playListFragment, OnCreate: try getArguments! ");
             if (songsList.size() ==0)
             {
                 Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
@@ -135,9 +136,9 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     private void initRecyclerView(View view)
     {
             mRecyclerView = view.findViewById(R.id.reycler_view);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             mAdapter = new PlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
-            Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" and MediaList size is:" +mMediaList.size());
+            Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" Title: " +mPlaylistTitle);
             mRecyclerView.setAdapter(mAdapter);
 
             updateDataSet();
@@ -220,7 +221,7 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
         mSelectedMedia = mediaItem;
         saveLastPlayedSongProperties();
     }
-    public  void addSongToList(Songs song)
+    public   void addSongToList(Songs song)
     {
         // check for duplicates
         for(int i=0; i<songsList.size();i++)
@@ -242,6 +243,7 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
                 .build();
         mMediaList.add(media);
         songsList.add(song);
+        Log.d(TAG, "addSongToList: songlist size after add is:"+songsList.size());
         // need to update database
         mIMainActivity.updateToDatabase(mPlaylistFragment);
         updateDataSet();
@@ -331,4 +333,5 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
         }
         return true;
     }
+
 }

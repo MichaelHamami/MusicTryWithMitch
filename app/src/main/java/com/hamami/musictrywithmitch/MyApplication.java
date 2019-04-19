@@ -3,6 +3,7 @@ package com.hamami.musictrywithmitch;
 import android.app.Application;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class MyApplication extends Application {
     {
         if (mInstance == null)
         {
-            Log.d(TAG, "getInstance:  new instance of my application , so last instance will removed");
+            Log.d(TAG, "getInstance:  new instance of my application , so last instance set to null");
             mInstance = new MyApplication();
         }
         return mInstance;
@@ -72,11 +73,18 @@ public class MyApplication extends Application {
                 return;
             }
         }
-//        mMediaItems.remove(
-//                new MediaBrowserCompat.MediaItem(
-//                        mediaId.getDescription(),MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
-//
-//        );
+    }
+    public ArrayList<MediaSessionCompat.QueueItem> getQueueItems()
+    {
+        ArrayList<MediaSessionCompat.QueueItem> queueItemArrayList = new ArrayList<>();
+        for (int i= 0; i<mMediaItems.size();i++)
+        {
+            MediaMetadataCompat mediaMetadataCompat = mTreeMap.get(mMediaItems.get(i));
+            MediaSessionCompat.QueueItem queueItem = new MediaSessionCompat.QueueItem(mediaMetadataCompat.getDescription(),mediaMetadataCompat.getDescription().hashCode());
+            queueItemArrayList.add(queueItem);
+        }
+
+        return queueItemArrayList;
     }
 
 }

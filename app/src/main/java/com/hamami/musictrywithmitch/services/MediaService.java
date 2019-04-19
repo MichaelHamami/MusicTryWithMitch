@@ -265,7 +265,13 @@ public class MediaService extends MediaBrowserServiceCompat
         @Override
         public void onSkipToNext() {
             Log.d(TAG,"onSkipToNext: SKIP TO NEXT");
-            Log.d(TAG, "onSkipToNext: the queueIndex before is: "+mQueueIndex +" playlistSize is: "+mPlaylist.size());
+            Log.d(TAG, "onSkipToNext:  the queueIndex before is: "+mQueueIndex +" playlistSize is: "+mPlaylist.size());
+            if(mPlaylist.size() == 0)
+            {
+                Log.d(TAG, "onSkipToNext: size is 0 ");
+
+
+            }
             if(mIsShuffle == false)
             {
                 mQueueIndex = (++mQueueIndex % mPlaylist.size());

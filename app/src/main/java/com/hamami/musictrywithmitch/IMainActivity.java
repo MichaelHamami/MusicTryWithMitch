@@ -46,6 +46,9 @@ public interface IMainActivity {
 
     void  setupViewPager(ViewPager viewPager );
 
+    void addNewPlaylist(Songs song,String playlistTitle);
+
+    void addSongToPlaylistFromSelectFragment(Songs song,String playlistTitle);
 
 
     }

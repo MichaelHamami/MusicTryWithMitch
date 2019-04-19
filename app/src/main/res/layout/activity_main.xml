@@ -53,6 +53,13 @@
         android:layout_width="match_parent"
         android:layout_height="480dp"
         android:layout_above="@id/bottom_media_controller">
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewpager_activity_main"
+                android:layout_marginTop="50dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </androidx.viewpager.widget.ViewPager>
         </FrameLayout>
 
         <fragment

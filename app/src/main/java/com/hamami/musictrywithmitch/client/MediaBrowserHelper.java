@@ -86,8 +86,7 @@ public class MediaBrowserHelper {
             Log.d(TAG, "subscribeToNewPlaylist:  unsubscribed ...");
             mMediaBrowser.unsubscribe(currentPlaylistId);
         }
-        Log.d(TAG, "subscribeToNewPlaylist: playlistId is: "+newPlaylistId +" and MediaBrowserSubscriptionCallBack is: " +mMediaBrowserSubscriptionCallBack);
-        Log.d(TAG, "subscribeToNewPlaylist: mMediaBrowser is : "+mMediaBrowser);
+        Log.d(TAG, "subscribeToNewPlaylist: playlistId is: "+newPlaylistId);
         mMediaBrowser.subscribe(newPlaylistId,mMediaBrowserSubscriptionCallBack);
     }
     public void addQueueItemFromPlaylist(MediaMetadataCompat mediaId)

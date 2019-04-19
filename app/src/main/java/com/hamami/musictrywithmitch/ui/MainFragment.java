@@ -33,6 +33,9 @@ public class MainFragment extends Fragment {
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
 
+    // vars
+    private ViewPagerAdapter mViewPagerAdapter;
+
     public ViewPager getViewPager() {
         return mViewPager;
     }
@@ -60,6 +63,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: called");
         if (getArguments() != null){
             Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
             mPlaylists = getArguments().getParcelableArrayList("array_playlist");
@@ -73,6 +77,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
+        Log.d(TAG, "onCreateView: called");
         return inflater.inflate(R.layout.fragment_main_viewpager,container,false);
     }
 
@@ -80,29 +85,50 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
-        Log.d(TAG, "onViewCreated: we get viewpager of main");
-        mViewPager = view.findViewById(R.id.viewpager);
-        mTabLayout = view.findViewById(R.id.tabLayout);
-        if(mPlaylists != null)
+        Log.d(TAG, "onViewCreated: called");
+        // trying something new
+        mViewPager = ((MainActivity) getActivity()).mViewPagerActivity;
+        mTabLayout = view.findViewById(R.id.tabLayout_main);
+//        mTabLayout = ((MainActivity) getActivity()).mTabLayoutActivity;
+        mViewPagerAdapter = ((MainActivity) getActivity()).mViewPagerAdapterActivity;
+
+        if(mViewPager.getAdapter() == null)
         {
-            if (mPlaylists.size() ==0)
-            {
-                Log.d(TAG, "onViewCreated: problem !!!!");
-            }
-            else
-            {
-                Log.d(TAG, "onViewCreated: try setup viewpager and tablayout");
-                    ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getFragmentManager());
-                    mViewPager.setAdapter(viewPagerAdapter);
-                mIMainActivity.setupViewPager(mViewPager);
-//                setupViewPager();
-                mTabLayout.setupWithViewPager(mViewPager);
-            }
+            mViewPager.setAdapter(mViewPagerAdapter);
         }
+        Log.d(TAG, "onViewCreated: try setup viewpager");
+        if(mViewPager.getVisibility() == View.GONE)
+        {
+            mViewPager.setVisibility(View.VISIBLE);
+        }
+//        mIMainActivity.setupViewPager(mViewPager);
+        mTabLayout.setupWithViewPager(mViewPager);
+//        mViewPager = view.findViewById(R.id.tabLayout);
+//        mTabLayout = view.findViewById(R.id.tabLayout);
+
+//        if(mPlaylists != null)
+//        {
+//            if (mPlaylists.size() ==0)
+//            {
+//                Log.d(TAG, "onViewCreated: problem !!!!");
+//            }
+//            else
+//            {
+//                Log.d(TAG, "onViewCreated: try setup viewpager");
+//                ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+////                    ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getFragmentManager());
+//                    mViewPager.setAdapter(viewPagerAdapter);
+//                mIMainActivity.setupViewPager(mViewPager);
+////                setupViewPager();
+//                Log.d(TAG, "onViewCreated: setup tablayout");
+//                mTabLayout.setupWithViewPager(mViewPager);
+//            }
+//        }
     }
 
     private void setupViewPager() {
-        ViewPagerAdapter viewPagerAdapter = ((ViewPagerAdapter)((MainActivity)(getActivity())).mViewPager.getAdapter());
+//        ViewPagerAdapter viewPagerAdapter = ((ViewPagerAdapter)((MainActivity)(getActivity())).mViewPager.getAdapter());
+        ViewPagerAdapter viewPagerAdapter = ((ViewPagerAdapter)mViewPager.getAdapter());
         Log.d(TAG, "setupViewPager: the adpater is : "+viewPagerAdapter);
         if(mPlaylists.size() != 0)
         {

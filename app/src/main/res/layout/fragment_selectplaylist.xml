@@ -4,17 +4,17 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SelectPlayListOld">
+    tools:context=".SelectPlayList">
 
     <Button
-        android:id="@+id/ButtonCreateNewPlaylist_old"
+        android:id="@+id/ButtonCreateNewPlaylist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Create New Playlist"
         android:background="@color/green"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/reycler_view_selectPlaylist_old"
+        android:id="@+id/reycler_view_selectPlaylist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"

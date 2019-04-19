@@ -1,64 +1,62 @@
 package com.hamami.musictrywithmitch;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hamami.musictrywithmitch.Models.Songs;
+import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.adapters.SelectPlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;
 
 import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class SelectPlayList extends AppCompatActivity implements SelectPlaylistRecyclerAdapter.IPlaylistSelector, DialogCreateNewPlaylist.OnInputListener {
+public class SelectPlayList extends Fragment implements SelectPlaylistRecyclerAdapter.IPlaylistSelector, DialogCreateNewPlaylist.OnInputListener {
 
     private static final String TAG = "SelectPlayList";
-
 
     // UI Components
     private RecyclerView mRecyclerView;
     private Button mButtonCreate;
 
-    
+    // Interface To send data to mainActivity
+    private IMainActivity mIMainActivity;
+
     //Vars
     private SelectPlaylistRecyclerAdapter mAdapter;
-
     private ArrayList<String> fragmentsTitles = new ArrayList<>();
     private Songs songSelected;
-    private String thePlayList;
-    private Boolean isNewPlaylist;
 
 
+
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_selectplaylist);
-        Log.d(TAG, "onCreate: Called");
-        mRecyclerView = findViewById(R.id.reycler_view_selectPlaylist);
-        mButtonCreate = findViewById(R.id.ButtonCreateNewPlaylist);
-
-//        if(getIntent().hasExtra("selected_song"))
-//        {
-//             songSelected = getIntent().getParcelableExtra("selected_song");
-//        }
-        if(getIntent().hasExtra("playlistTitles"))
-        {
-            fragmentsTitles = getIntent().getStringArrayListExtra("playlistTitles");
-        }
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new SelectPlaylistRecyclerAdapter(this,fragmentsTitles,this);
-        mRecyclerView.setAdapter(mAdapter);
-
-        mAdapter.notifyDataSetChanged();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
+        return inflater.inflate(R.layout.fragment_selectplaylist,container,false);
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
+    {
+        Log.d(TAG, "onViewCreated: called");
+        initRecyclerView(view);
+//        mRecyclerView = view.findViewById(R.id.reycler_view_selectPlaylist);
+        mButtonCreate = view.findViewById(R.id.ButtonCreateNewPlaylist);
 
         mButtonCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,41 +66,64 @@ public class SelectPlayList extends AppCompatActivity implements SelectPlaylistR
                 openDialog();
             }
         });
-        
+    }
+
+    private void initRecyclerView(View view)
+    {
+        mRecyclerView = view.findViewById(R.id.reycler_view_selectPlaylist);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        mAdapter = new SelectPlaylistRecyclerAdapter(getContext(),fragmentsTitles,this);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: Called");
+
+        if (getArguments() != null){
+
+            fragmentsTitles = getArguments().getStringArrayList("playlistTitles");
+            songSelected = getArguments().getParcelable("songSelected");
+        }
+
     }
 
     private void openDialog()
     {
         DialogCreateNewPlaylist dialog = new DialogCreateNewPlaylist();
-        dialog.show(getSupportFragmentManager(),"DialogSelectPlaylist");
+        dialog.show(getChildFragmentManager(),"DialogSelectPlaylist");
     }
 
     @Override
-    public void onPlaylistSelected(int position) 
+    public void onPlaylistSelected(int position)
     {
         Log.d(TAG, "onPlaylistSelected: Called");
-        isNewPlaylist = false;
-        Intent intent= new Intent();
-        intent.putExtra("isNewPlaylist",isNewPlaylist);
-        intent.putExtra("selectedPlaylist",fragmentsTitles.get(position));
-        setResult(4,intent);
-        //finish must be declared here to send the result to parent activity
-        finish();
+        // send to mainActivity the method to work
+//        mIMainActivity.addSongToPlaylist(songSelected,fragmentsTitles.get(position));
+        mIMainActivity.addSongToPlaylistFromSelectFragment(songSelected,fragmentsTitles.get(position));
+//        Log.d(TAG, "onPlaylistSelected: we try to do transaction ");
+////        getFragmentManager().popBackStack();
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//        transaction.replace(R.id.main_container,getFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
+//
+//        Log.d(TAG, "onPlaylistSelected: try add song");
+//        mIMainActivity.addSongToPlaylist(songSelected,fragmentsTitles.get(position));
     }
 
+    // input from the Dialog
     @Override
     public void sendInput(String input)
     {
         Log.d(TAG, "sendInput: Got the input: "+input);
-        thePlayList = input;
-        isNewPlaylist = true;
-        Intent intent= new Intent();
-        intent.putExtra("isNewPlaylist",isNewPlaylist);
-        intent.putExtra("newPlaylist",thePlayList);
-        // send data
-        setResult(4,intent);
-//        finish must be declared here to send the result to parent activity
-        finish();
+        // send the arguments to main activity
+        mIMainActivity.addNewPlaylist(songSelected,input);
+        Log.d(TAG, "sendInput: after addNewplaylistcalled");
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(getId(),getFragmentManager().findFragmentByTag(getString(R.string.fragment_main)));
+
     }
 
     @Override
@@ -119,9 +140,17 @@ public class SelectPlayList extends AppCompatActivity implements SelectPlaylistR
     }
 
     @Override
-    public void onBackPressed() {
-        Log.d(TAG, "onBackPressed: called");
-        setResult(3);
-        finish();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mIMainActivity = (IMainActivity) getActivity();
     }
+
+    // should see what we can do
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "onBackPressed: called");
+//        setResult(3);
+//        finish();
+//    }
 }
+

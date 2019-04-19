@@ -248,7 +248,8 @@ public static QueueFragment newInstance(Playlist playlist){
                 .build();
         mMediaList.add(media);
         mSongsList.add(song);
-        updateDataSet();
+        mAdapter.notifyItemInserted(mSongsList.size());
+//        updateDataSet();
     }
     private   void deleteSongFromList(int position)
     {
