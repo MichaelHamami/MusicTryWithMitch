@@ -55,6 +55,8 @@ import com.hamami.musictrywithmitch.ui.MainFragment;
 import com.hamami.musictrywithmitch.ui.MediaControllerFragment;
 import com.hamami.musictrywithmitch.ui.PlaylistFragment;
 import com.hamami.musictrywithmitch.ui.QueueFragment;
+import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;
+import com.hamami.musictrywithmitch.util.DialogReportToDeveloper;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -136,42 +138,15 @@ public class MainActivity extends AppCompatActivity implements
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // check , tablayout and viewpager is was from last update
-//        mTabLayout =  findViewById(R.id.tabLayout);
-//        mViewPager = findViewById(R.id.viewpager);
-//        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-//        mViewPager.setAdapter(viewPagerAdapter);
-//        Log.d(TAG, "onCreate: the adpter to string is? :"+mViewPager.getAdapter().toString());
-//        Log.d(TAG, "onCreate: the adpter to class is? :"+mViewPager.getAdapter().getClass().toString());
-
         mToolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(mToolbar);
-
-         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-         mActivityTitle = getTitle().toString();
-         mExpandListView = findViewById(R.id.nav_expended);
-
-//         View listHeaderView = getLayoutInflater().inflate(R.layout.nav_header_main,null,false);
-//         mExpandListView.addHeaderView(listHeaderView);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+        mExpandListView = findViewById(R.id.nav_expended);
 
         genData();
         addDrawerItem();
         setupDrawer();
-
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setHomeButtonEnabled(true);
-//        getSupportActionBar().setTitle("Hamami1");
-
-//        mDrawerToggle = new ActionBarDrawerToggle(
-//                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        mDrawerLayout.addDrawerListener(mDrawerToggle);
-//        mDrawerToggle.syncState();
-//
-//         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-//        mNavigationView.setNavigationItemSelectedListener(this);
-
-
-           mPlaylists = new ArrayList<>();
+        mPlaylists = new ArrayList<>();
         mPlaylistRepository = new PlaylistRepository(this);
 
 
@@ -267,9 +242,6 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
-                // Toast.makeText(getApplicationContext(),
-                // "Group Clicked " + listDataHeader.get(groupPosition),
-                // Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -278,9 +250,6 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onGroupExpand(int groupPosition) {
-                Toast.makeText(getApplicationContext(),
-                        lstTitle.get(groupPosition) + " Expanded",
-                        Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -289,9 +258,9 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onGroupCollapse(int groupPosition) {
-                Toast.makeText(getApplicationContext(),
-                        lstTitle.get(groupPosition) + " Collapsed",
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(),
+//                        lstTitle.get(groupPosition) + " Collapsed",
+//                        Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -304,18 +273,17 @@ public class MainActivity extends AppCompatActivity implements
                         Toast.LENGTH_SHORT).show();
                 if(selectedItem.equalsIgnoreCase("Report to Developer"))
                 {
-                    Log.d(TAG, "onChildClick: we try to send");
-                    new SendMailAsyncTask("the body style","the subject style? really?").execute();
+                    Log.d(TAG, "onChildClick: we try to openDialog");
+                    DialogReportToDeveloper dialog = new DialogReportToDeveloper();
+                    dialog.show(getSupportFragmentManager(),"DialogReportToDeveloper");
+//                    new SendMailAsyncTask("the body style","the subject style? really?").execute();
 
                 }
                 else if(selectedItem.equalsIgnoreCase("about"))
                 {
+                    // todo people can stack it how many they want.....
                     Log.d(TAG, "onChildClick: click on about we do transaction");
-//                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.main_container,new AboutFragment()).commit();
                     doFragmentTransaction(new AboutFragment(),"about",true);
-//                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.main_container,getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 return false;
