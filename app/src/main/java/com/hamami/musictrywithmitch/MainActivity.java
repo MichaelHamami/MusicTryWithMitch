@@ -227,6 +227,16 @@ public class MainActivity extends AppCompatActivity implements
     private void doFragmentTransaction(Fragment fragment, String tag, boolean addToBackStack){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
+        // if Viewpager is Unvisible and we change to Main Fragment that include that pager
+        if(tag.equalsIgnoreCase(getString(R.string.fragment_main)) && mViewPagerActivity.getVisibility() != View.VISIBLE)
+        {
+            Log.d(TAG, "doFragmentTransaction: setVisible");
+            mViewPagerActivity.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            mViewPagerActivity.setVisibility(View.GONE);
+        }
         transaction.replace(R.id.main_container, fragment, tag);
         if(addToBackStack){
             transaction.addToBackStack(tag);
@@ -300,9 +310,12 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 else if(selectedItem.equalsIgnoreCase("about"))
                 {
-                    Log.d(TAG, "onChildClick: click on about");
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.main_container,new AboutFragment()).commit();
+                    Log.d(TAG, "onChildClick: click on about we do transaction");
+//                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                    transaction.replace(R.id.main_container,new AboutFragment()).commit();
+                    doFragmentTransaction(new AboutFragment(),"about",true);
+//                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                    transaction.replace(R.id.main_container,getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 return false;
@@ -338,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+//        int id = item.getItemId();
         if(mDrawerToggle.onOptionsItemSelected(item))
             return true;
         return super.onOptionsItemSelected(item);
