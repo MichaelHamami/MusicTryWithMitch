@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -55,6 +56,7 @@ import com.hamami.musictrywithmitch.ui.MainFragment;
 import com.hamami.musictrywithmitch.ui.MediaControllerFragment;
 import com.hamami.musictrywithmitch.ui.PlaylistFragment;
 import com.hamami.musictrywithmitch.ui.QueueFragment;
+import com.hamami.musictrywithmitch.ui.StorageFragment;
 import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;
 import com.hamami.musictrywithmitch.util.DialogReportToDeveloper;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
@@ -274,6 +276,10 @@ public class MainActivity extends AppCompatActivity implements
                 if(selectedItem.equalsIgnoreCase("Report to Developer"))
                 {
                     Log.d(TAG, "onChildClick: we try to openDialog");
+//                    Dialog dialog = new Dialog(context, android.R.style.Theme_Light);
+//                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//                    dialog.setContentView(R.layout.MyCustomDialogLayout);
+//                    dialog.show();
                     DialogReportToDeveloper dialog = new DialogReportToDeveloper();
                     dialog.show(getSupportFragmentManager(),"DialogReportToDeveloper");
 //                    new SendMailAsyncTask("the body style","the subject style? really?").execute();
@@ -284,6 +290,11 @@ public class MainActivity extends AppCompatActivity implements
                     // todo people can stack it how many they want.....
                     Log.d(TAG, "onChildClick: click on about we do transaction");
                     doFragmentTransaction(new AboutFragment(),"about",true);
+                }
+                else if(selectedItem.equalsIgnoreCase("Change Music Folder"))
+                {
+                    Log.d(TAG, "onChildClick: click on Change Music Folder");
+                    doFragmentTransaction(new StorageFragment(),"storage",true);
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 return false;
@@ -426,7 +437,12 @@ public class MainActivity extends AppCompatActivity implements
         
     }
 
-        private void setupViewPager() {
+    @Override
+    public void setRootFolder(String rootFolder) {
+        Log.d(TAG, "setRootFolder: called new Root is: "+rootFolder);
+    }
+
+    private void setupViewPager() {
 
         if(mPlaylists.size() != 0)
         {

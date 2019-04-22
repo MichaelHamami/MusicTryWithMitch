@@ -29,10 +29,7 @@ public class AboutFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        mAboutMe.setText("My name Micahel Hamami Starter Developer");
-//        mVersion.setText("Version 1");
-//        mIconApp.setImageResource(R.drawable.music_app);
-//        mAppName.setText("Music is Life");
+
     }
 
 
@@ -56,7 +53,7 @@ public class AboutFragment extends Fragment {
 
         mAboutMe.setText("My name Micahel Hamami Starter Developer");
         mVersion.setText("Version 1");
-        mIconApp.setImageResource(R.drawable.music_app);
+//        mIconApp.setImageResource(R.drawable.music_app);
         mAppName.setText("Music is Life");
     }
 

@@ -1,6 +1,7 @@
 package com.hamami.musictrywithmitch.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,120 +9,128 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.hamami.musictrywithmitch.Models.Item;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class StorageRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = "PlaylistRecyclerAdapter";
+public class StorageRecyclerAdapter extends RecyclerView.Adapter<StorageRecyclerAdapter.ViewHolder> {
 
-    private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Songs> songsList = new ArrayList<>();
+    private static final String TAG = "StorageRecyclerAdapter";
+
+    private List<Item> itemList;
     private Context mContext;
-    private IMediaSelector mIMediaSelector;
-    private int mSelectedIndex;
+    private IStorageSelector mStorageSelector;
 
-    public StorageRecyclerAdapter(Context context, ArrayList<Songs> songsList, ArrayList<MediaMetadataCompat> mMediaList, IMediaSelector mediaSelector)
+    public StorageRecyclerAdapter(Context context,List<Item> stringList,IStorageSelector iStorageSelector )
     {
-        Log.d(TAG, "PlaylistRecyclerAdapter: called.");
-        this.mMediaList = mMediaList;
-        this.songsList = songsList;
+        Log.d(TAG, "StorageRecyclerAdapter: called.");
+        this.itemList = stringList;
         this.mContext = context;
-        this.mIMediaSelector = mediaSelector;
-        mSelectedIndex = -1;
+        this.mStorageSelector = iStorageSelector;
+
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.layout_playlist_list_item, null);
-        ViewHolder vh = new ViewHolder(view, mIMediaSelector);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_storage_list_item, null);
+        ViewHolder vh = new ViewHolder(view,mStorageSelector);
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-
-//        ((ViewHolder)viewHolder).songName.setText(songsList.get(i).getNameSong());
-//         ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
-
-        ((ViewHolder)viewHolder).songName.setText(mMediaList.get(i).getDescription().getTitle());
-        ((ViewHolder)viewHolder).songTime.setText(songsList.get(i).getSongLength());
-
-        if(i == mSelectedIndex){
-            ((ViewHolder)viewHolder).songName.setTextColor(ContextCompat.getColor(mContext, R.color.green));
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Log.d(TAG,"onBindViewHolder: called.");
+        File file = new File(itemList.get(position).getUri().getPath());
+        if(file.isDirectory())
+        {
+            holder.imageView.setImageResource(R.drawable.folder);
+            holder.storageOptions.setVisibility(View.VISIBLE);
         }
-        else{
-            ((ViewHolder)viewHolder).songName.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+        else
+        {
+            holder.imageView.setImageResource(R.drawable.file1);
         }
+        holder.textViewStringName.setText(itemList.get(position).getName());
     }
+
+
 
     @Override
     public int getItemCount() {
-        return songsList.size();
+        return itemList.size();
     }
 
-    public void setSelectedIndex(int index){
-        mSelectedIndex = index;
-        notifyDataSetChanged();
-    }
 
-    public int getSelectedIndex(){
-        return mSelectedIndex;
-    }
-
-    public int getIndexOfItem(MediaMetadataCompat mediaItem){
-        for(int i = 0; i<mMediaList.size(); i++ ){
-            if(mMediaList.get(i).getDescription().getMediaId().equals(mediaItem.getDescription().getMediaId())){
-                return i;
-            }
-        }
-        return -1;
-    }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        // title = songName , artist=songTime
-        private TextView songName, songTime;
-//        private TextView songOptions;
-        private ImageView songOptions;
+        ImageView imageView;
+        TextView textViewStringName;
+        ImageView storageOptions;
+        private IStorageSelector storageSelector;
 
-        private IMediaSelector iMediaSelector;
 
-        public ViewHolder(@NonNull View itemView, IMediaSelector iMediaSelector) {
+        public ViewHolder(@NonNull View itemView , IStorageSelector iStorageSelector) {
             super(itemView);
-            songName = itemView.findViewById(R.id.song_name);
-            songTime = itemView.findViewById(R.id.song_time);
-            songOptions = itemView.findViewById(R.id.song_option);
-            this.iMediaSelector = iMediaSelector;
+            imageView = itemView.findViewById(R.id.imgView);
+            textViewStringName = itemView.findViewById(R.id.string);
+            storageOptions = itemView.findViewById(R.id.storage_option);
+            this.storageSelector = iStorageSelector;
 
             itemView.setOnClickListener(this);
-            songOptions.setOnClickListener(this);
+            imageView.setOnClickListener(this);
+            storageOptions.setOnClickListener(this);
+
         }
 
         @Override
         public void onClick(View view) {
-            if(view.getId() == R.id.song_option)
+            Log.d(TAG, "onClick: called");
+            if(view.getId() == R.id.imgView)
             {
-                iMediaSelector.onSongOptionSelected(getAdapterPosition(),view);
+                Log.d(TAG, "onClick: get here");
+                File file = new File(itemList.get(getAdapterPosition()).getUri().getPath());
+                if(file.isDirectory())
+                {
+                    Log.d(TAG, "onClick: clear items and try to get them again");
+                    itemList.clear();
+                    File[] files = file.listFiles();
+                    for(File singleFile : files)
+                    {
+                        if(!singleFile.isHidden())
+                        {
+                            itemList.add(new Item(singleFile.getName(), Uri.fromFile(singleFile)));
+                        }
+                    }
+                    notifyDataSetChanged();
+                }
+                else
+                {
+                    Toast.makeText(view.getContext(),"You clicked on File ",Toast.LENGTH_SHORT).show();
+                }
+
             }
-            else
+            else if(view.getId() == R.id.storage_option)
             {
-                iMediaSelector.onMediaSelected(getAdapterPosition());
+                mStorageSelector.onFolderOptionSelected(itemList.get(getAdapterPosition()),view);
             }
         }
     }
 
-    public interface IMediaSelector{
-        void onMediaSelected(int position);
-        void onSongOptionSelected(int position, View view);
+    public interface IStorageSelector{
+        void onFolderOptionSelected(Item item, View view);
     }
 
 }

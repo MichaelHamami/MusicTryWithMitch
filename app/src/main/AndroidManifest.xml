@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.hamami.musictrywithmitch">
 
     <dist:module dist:instant="false" />
@@ -17,7 +18,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".MainActivity"
             android:configChanges="orientation"
             android:windowSoftInputMode="adjustPan"
@@ -29,9 +31,9 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".SelectPlayList">
-        </activity>
+        <!--<activity-->
+            <!--android:name=".SelectPlayList">-->
+        <!--</activity>-->
 
         <service android:name=".services.MediaService">
             <intent-filter>

@@ -1,7 +1,9 @@
 package com.hamami.musictrywithmitch.ui;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import com.hamami.musictrywithmitch.IMainActivity;
+import com.hamami.musictrywithmitch.Models.Item;
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
@@ -19,82 +22,63 @@ import com.hamami.musictrywithmitch.adapters.StorageRecyclerAdapter;
 import com.hamami.musictrywithmitch.persistence.PlaylistRepository;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class StorageFragment extends Fragment implements StorageRecyclerAdapter.IMediaSelector
+public class StorageFragment extends Fragment implements StorageRecyclerAdapter.IStorageSelector
 {
     private static final String TAG = "StorgeFragment";
 
     // UI Components
     private RecyclerView mRecyclerView;
+    RecyclerView.Adapter mAdapter;
+    RecyclerView.LayoutManager mLayoutManager;
+    List<Item> mDataset = new ArrayList<>();
 
-    //Vars
-    // the title we will get from bundle
-    private String mPlaylistTitle;
-    private PlaylistRecyclerAdapter mAdapter;
-    private ArrayList<MediaMetadataCompat> mMediaList = new ArrayList<>();
-    private ArrayList<Songs> songsList = new ArrayList<>();
     private IMainActivity mIMainActivity;
-    private MediaMetadataCompat mSelectedMedia;
-    private boolean mIsPlaylistInDatabase;
-    private Playlist mPlaylistFragment;
-
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mPlaylistRepository = new PlaylistRepository(getContext());
-        if (getArguments() != null){
-            Log.d(TAG, "playListFragment, OnCreate: try getArguments!");
-            if (songsList.size() ==0)
-            {
-                Toast.makeText(getContext(),"we get arguments",Toast.LENGTH_LONG).show();
-                songsList = getArguments().getParcelableArrayList("songLists");
-//                addToMediaList(songsList);
-                mPlaylistTitle = getArguments().getString("title");
-                mPlaylistFragment = new Playlist(mPlaylistTitle,songsList);
-                mIsPlaylistInDatabase = getArguments().getBoolean("isPlaylistInDatabase");
-
-//                if(mIsPlaylistInDatabase == false)
-//                {
-//                    savePlaylistToDatabase();
-//
-//                }
-            }
-            setRetainInstance(true);
-        }
+        Log.d(TAG, "onCreate: called");
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_playlist,container,false);
+        return inflater.inflate(R.layout.fragment_storage,container,false);
     }
 
     // called after onCreateView
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
-        initRecyclerView(view);
+        Log.d(TAG, "onViewCreated: called ");
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+        File[] files = root.listFiles();
+        for(File singleFile : files)
+        {
+            if(!singleFile.isHidden())
+            {
+                mDataset.add(new Item(singleFile.getName(), Uri.fromFile(singleFile)));
+            }
+        }
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mAdapter = new StorageRecyclerAdapter(getContext(),mDataset,this);
+        mRecyclerView = view.findViewById(R.id.storage_recyclerview);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
 
-    }
-
-
-    private void initRecyclerView(View view)
-    {
-            mRecyclerView = view.findViewById(R.id.reycler_view);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-//            mAdapter = new PlaylistRecyclerAdapter(getActivity(),songsList,mMediaList,this);
-            Log.d(TAG, "initRecyclerView: called , Song list size is:"+songsList.size()+" and MediaList size is:" +mMediaList.size());
-            mRecyclerView.setAdapter(mAdapter);
-
-            updateDataSet();
+        RecyclerView.ItemDecoration divider = new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(divider);
+        updateDataSet();
 
     }
 
@@ -107,54 +91,21 @@ public class StorageFragment extends Fragment implements StorageRecyclerAdapter.
     public void onAttach(Context context) {
         super.onAttach(context);
         mIMainActivity = (IMainActivity) getActivity();
-    }
 
-    @Override
-    public void onMediaSelected(int position)
-    {
-        Log.d(TAG, "onSongSelected: list item is clicked! +List size is: "+mMediaList.size());
-        mIMainActivity.getMyApplicationInstance().setMediaItems(mMediaList);
-        mSelectedMedia = mMediaList.get(position);
-        mAdapter.setSelectedIndex(position);
-        mIMainActivity.onMediaSelected(mPlaylistTitle,mSelectedMedia,position);
 
     }
-
-    @Override
-    public void onSongOptionSelected(int position,View view)
-    {
-        Log.d(TAG, "onSongOptionSelected: you clicked on menu good job");
-        showPopup(position,view);
-    }
-    public void showPopup(final int postion, View view){
+    public void showPopup(Item itemStorage, View view){
         PopupMenu popup = new PopupMenu(getContext(), view);
-        popup.inflate(R.menu.options_menu);
+        popup.inflate(R.menu.storage_options_menu);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
         {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.playMenu:
-                        Log.d(TAG, "onMenuItemClick: play menu clicked ");
-                        onMediaSelected(postion);
+                    case R.id.setAsRoot:
+                        Log.d(TAG, "onMenuItemClick: set as root menu clicked ");
+                        mIMainActivity.setRootFolder(itemStorage.getName());
                         return true;
-                    case R.id.deleteMenu:
-                        Log.d(TAG, "onMenuItemClick: delete menu  clicked ");
-//                        deleteSongFromList(postion);
-                        return true;
-                    case R.id.addToPlaylistMenu:
-                        Log.d(TAG, "onMenuItemClick: add to playlist menu clicked song:"+songsList.get(postion).getNameSong());
-                        mIMainActivity.onAddPlaylistMenuSelected(songsList.get(postion));
-                        return true;
-                    case R.id.addAsFavorite:
-                        Log.d(TAG, "onMenuItemClick: add to Favorite menu  clicked ");
-                        mIMainActivity.addSongToPlaylist(songsList.get(postion),"Favorite");
-                        return true;
-                    case R.id.addToQueue:
-                        Log.d(TAG, "onMenuItemClick: Add to queue menu  clicked ");
-                        mIMainActivity.addSongToPlaylist(songsList.get(postion),"Queue");
-                        return true;
-
                     default:
                         return false;
                 }
@@ -164,17 +115,14 @@ public class StorageFragment extends Fragment implements StorageRecyclerAdapter.
         popup.show();
     }
 
-    public void updateUI(MediaMetadataCompat mediaItem)
-    {
-        mAdapter.setSelectedIndex(mAdapter.getIndexOfItem(mediaItem));
-        mSelectedMedia = mediaItem;
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("selected_index",mAdapter.getSelectedIndex());
     }
 
-
+    @Override
+    public void onFolderOptionSelected(Item item,View view) {
+        Log.d(TAG, "onFolderOptionSelected: called , you clicked on menu");
+        showPopup(item,view);
+    }
 }

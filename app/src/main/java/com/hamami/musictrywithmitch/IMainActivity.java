@@ -50,5 +50,7 @@ public interface IMainActivity {
 
     void addSongToPlaylistFromSelectFragment(Songs song,String playlistTitle);
 
+    void setRootFolder(String rootFolder);
+
 
     }

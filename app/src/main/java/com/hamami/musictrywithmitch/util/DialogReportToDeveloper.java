@@ -1,5 +1,7 @@
 package com.hamami.musictrywithmitch.util;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.fragment.app.DialogFragment;
 
 import com.hamami.musictrywithmitch.R;
 import com.hamami.musictrywithmitch.async.SendMailAsyncTask;
@@ -21,11 +24,7 @@ public class DialogReportToDeveloper extends AppCompatDialogFragment {
 
     private static final String TAG = "DialogReportToDeveloper";
 
-    public interface OnInputListener{
-        void sendInput(String input);
-    }
 
-    public OnInputListener mOnInputListener;
     //UI
     private EditText mInputBody;
     private EditText mInputSubject;
@@ -35,6 +34,26 @@ public class DialogReportToDeveloper extends AppCompatDialogFragment {
     private TextView textViewSubject;
     private TextView textViewBody;
 
+
+
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NORMAL,R.style.FullScreenDialogStyle);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+    }
 
     @Nullable
     @Override
@@ -105,17 +124,9 @@ public class DialogReportToDeveloper extends AppCompatDialogFragment {
         }
     }
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        try{
-            mOnInputListener = (OnInputListener) getActivity();
-        }
-        catch (ClassCastException e)
-        {
-            Log.e(TAG, "onAttach: ClassCastException: "+e.getMessage());
-        }
     }
+
 }

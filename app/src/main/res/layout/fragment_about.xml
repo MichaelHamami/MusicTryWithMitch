@@ -2,20 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center|top">
 
     <TextView
         android:layout_marginTop="40dp"
         android:text="textasdasdsadsadasdasdasdsa1"
         android:id="@+id/about_app_name"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <ImageView
-        android:layout_marginTop="40dp"
         android:id="@+id/about_app_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="84dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/music_app" />
 
     <TextView
         android:layout_marginTop="40dp"
