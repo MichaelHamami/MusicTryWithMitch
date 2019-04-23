@@ -100,10 +100,12 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     {
         initRecyclerView(view);
         mShuffle = view.findViewById(R.id.shuffle);
+        mIMainActivity.setFirstShuffle();
         mShuffle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mIMainActivity.shufflePlayingPlaylist();
+                mIMainActivity.shufflePlayingPlaylist(mShuffle.isActivated());
+                mShuffle.setActivated(!mShuffle.isActivated());
             }
         });
 

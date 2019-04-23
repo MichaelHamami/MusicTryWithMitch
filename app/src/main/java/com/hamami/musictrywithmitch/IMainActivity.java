@@ -1,6 +1,5 @@
 package com.hamami.musictrywithmitch;
 
-import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 
 import com.hamami.musictrywithmitch.Models.Playlist;
@@ -9,9 +8,6 @@ import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import androidx.viewpager.widget.ViewPager;
-
 
 public interface IMainActivity {
 
@@ -44,9 +40,11 @@ public interface IMainActivity {
 
     void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList);
 
-    void shufflePlayingPlaylist();
+    void shufflePlayingPlaylist(boolean isShuffle);
 
-    void  setupViewPager(ViewPager viewPager );
+    void setFirstShuffle();
+
+//    void  setupViewPager(ViewPager viewPager );
 
     void addNewPlaylist(Songs song,String playlistTitle);
 

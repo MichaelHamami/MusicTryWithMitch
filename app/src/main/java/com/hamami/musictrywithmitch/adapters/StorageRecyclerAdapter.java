@@ -2,7 +2,6 @@ package com.hamami.musictrywithmitch.adapters;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hamami.musictrywithmitch.Models.Item;
-import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.R;
 
 import java.io.File;
@@ -20,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 

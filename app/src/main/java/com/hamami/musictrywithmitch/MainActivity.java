@@ -395,31 +395,31 @@ public class MainActivity extends AppCompatActivity implements
         mViewPagerAdapterActivity.notifyDataSetChanged();
     }
 
-    @Override
-    public void setupViewPager(ViewPager viewPager) {
-
-        ViewPagerAdapter viewPagerAdapterLoc = (ViewPagerAdapter)viewPager.getAdapter();
-        if(mPlaylists.size() != 0)
-        {
-            boolean foundTitle = false;
-            Log.d(TAG, "setupViewPager: We get playlist's from Database Size is:"+mPlaylists.size());
-            for(int i = 0; i < mPlaylists.size();i++)
-            {
-                viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
-            }
-            viewPagerAdapterLoc.notifyDataSetChanged();
-        }
-        else
-        {
-            Log.d(TAG, "setupViewPager: We get playlist from Storage");
-            Playlist playlistFromStorage = retrivePlaylistFromStorage();
-            viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(playlistFromStorage,false),playlistFromStorage.getTitle());
-            ArrayList<Songs> sonlistinu = new ArrayList<>();
-            sonlistinu.add(playlistFromStorage.getSongs().get(0));
-            viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu),false),"Favorite");
-            viewPagerAdapterLoc.notifyDataSetChanged();
-        }
-    }
+//    @Override
+//    public void setupViewPager(ViewPager viewPager) {
+//
+//        ViewPagerAdapter viewPagerAdapterLoc = (ViewPagerAdapter)viewPager.getAdapter();
+//        if(mPlaylists.size() != 0)
+//        {
+//            boolean foundTitle = false;
+//            Log.d(TAG, "setupViewPager: We get playlist's from Database Size is:"+mPlaylists.size());
+//            for(int i = 0; i < mPlaylists.size();i++)
+//            {
+//                viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
+//            }
+//            viewPagerAdapterLoc.notifyDataSetChanged();
+//        }
+//        else
+//        {
+//            Log.d(TAG, "setupViewPager: We get playlist from Storage");
+//            Playlist playlistFromStorage = retrivePlaylistFromStorage();
+//            viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(playlistFromStorage,false),playlistFromStorage.getTitle());
+//            ArrayList<Songs> sonlistinu = new ArrayList<>();
+//            sonlistinu.add(playlistFromStorage.getSongs().get(0));
+//            viewPagerAdapterLoc.addFragment(PlaylistFragment.newInstance(new Playlist("Favorite",sonlistinu),false),"Favorite");
+//            viewPagerAdapterLoc.notifyDataSetChanged();
+//        }
+//    }
 
     @Override
     public void addNewPlaylist(Songs song, String playlistTitle) {
@@ -569,10 +569,24 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void shufflePlayingPlaylist()
+    public void shufflePlayingPlaylist(boolean isShuffle)
     {
         Log.d(TAG, "shufflePlayingPlaylist: called we shuffle");
-        mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL);
+        if (isShuffle == true)
+        {
+            mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE);
+        }
+        else
+        {
+            mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL);
+        }
+
+    }
+
+    @Override
+    public void setFirstShuffle()
+    {
+        mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE);
     }
 
     @Override
