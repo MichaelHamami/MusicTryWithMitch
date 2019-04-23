@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -566,6 +567,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onFinishedDragInQueueFragment: the new position is : "+position);
         mMediaBrowserHelper.setQueueItemsFromPlaylist(mediaList);
         mMyPrefManager.saveQueuePosition(position);
+        mMediaBrowserHelper.setQueueIndex(position);
     }
 
     @Override

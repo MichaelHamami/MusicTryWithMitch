@@ -63,7 +63,7 @@ public class MediaService extends MediaBrowserServiceCompat
 
         // A token that can be used to create a MediaController for this session
         setSessionToken(mSession.getSessionToken());
-
+//        mSession.getController().get
         mPlayback = new MediaPlayerAdapter(this,new MediaPlayerListener());
         mMediaNotificationManager = new MediaNotificationManager(this);
     }
@@ -128,6 +128,13 @@ public class MediaService extends MediaBrowserServiceCompat
         public void setQueueIndex(int queueIndex)
         {
             mQueueIndex = queueIndex;
+        }
+
+        @Override
+        public void onRewind() {
+            Log.d(TAG, "onRewind: but we not doing this we set the QueueIndex");
+            mQueueIndex = mMyPrefManager.getQueuePosition();
+            Log.d(TAG, "onRewind: queueu index set to: "+mQueueIndex);
         }
 
         @Override

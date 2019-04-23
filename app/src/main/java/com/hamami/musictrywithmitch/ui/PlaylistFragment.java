@@ -100,7 +100,7 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     {
         initRecyclerView(view);
         mShuffle = view.findViewById(R.id.shuffle);
-        mIMainActivity.setFirstShuffle();
+//        mIMainActivity.setFirstShuffle();
         mShuffle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

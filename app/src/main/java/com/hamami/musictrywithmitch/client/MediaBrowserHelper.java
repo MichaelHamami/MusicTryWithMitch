@@ -1,14 +1,17 @@
 package com.hamami.musictrywithmitch.client;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.IMediaSession;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
 import java.util.ArrayList;
@@ -93,15 +96,18 @@ public class MediaBrowserHelper {
     {
         Log.d(TAG, "addQueueItemFromPlaylist: Called we call controller to add: "+mediaId.getDescription().getMediaId());
         mMediaController.addQueueItem(mediaId.getDescription());
+
     }
     public void removeQueueItemFromPlaylist(MediaMetadataCompat mediaId)
     {
         Log.d(TAG, "removeQueueItemFromPlaylist: Called we call controller to remove");
         mMediaController.removeQueueItem(mediaId.getDescription());
     }
-    public void setQueueIndex(int index)
-    {
-
+    public void setQueueIndex(int index) {
+        Log.d(TAG, "setQueueIndex: called we actully called rewind");
+        mMediaController.getTransportControls().rewind();
+//        @SuppressLint("RestrictedApi") final IMediaSession extraBinder = mMediaController.getSessionToken().getExtraBinder();
+//        extraBinder.rewind();
     }
     public void  setQueueItemsFromPlaylist(ArrayList<MediaMetadataCompat> mediaList)
     {
@@ -196,6 +202,7 @@ public class MediaBrowserHelper {
 
 //                    mMediaController.addQueueItem(mediaItem.getDescription());
                 }
+                mMediaController.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE);
         }
     }
 
