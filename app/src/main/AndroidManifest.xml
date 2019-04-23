@@ -30,11 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!--<activity-->
-            <!--android:name=".SelectPlayList">-->
-        <!--</activity>-->
-
         <service android:name=".services.MediaService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService"/>

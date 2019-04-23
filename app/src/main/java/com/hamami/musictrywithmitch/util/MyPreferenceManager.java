@@ -2,8 +2,11 @@ package com.hamami.musictrywithmitch.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import java.io.File;
 
 import static com.hamami.musictrywithmitch.util.Constants.LAST_ARTIST;
 import static com.hamami.musictrywithmitch.util.Constants.MEDIA_QUEUE_POSITION;
@@ -75,9 +78,9 @@ public class MyPreferenceManager {
         editor.apply();
     }
 
-    public void saveLastRootMediaFolder(String root){
+    public void saveLastRootMediaFolder(File root){
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(MUSIC_ROOT_FOLDER, root);
+        editor.putString(MUSIC_ROOT_FOLDER, root.getAbsolutePath().toString());
         editor.apply();
     }
 

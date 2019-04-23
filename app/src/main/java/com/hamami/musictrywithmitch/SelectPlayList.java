@@ -8,17 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.hamami.musictrywithmitch.Models.Songs;
-import com.hamami.musictrywithmitch.adapters.PlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.adapters.SelectPlaylistRecyclerAdapter;
 import com.hamami.musictrywithmitch.util.DialogCreateNewPlaylist;
-
 import java.util.ArrayList;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -94,7 +88,8 @@ public class SelectPlayList extends Fragment implements SelectPlaylistRecyclerAd
     private void openDialog()
     {
         DialogCreateNewPlaylist dialog = new DialogCreateNewPlaylist();
-        dialog.show(getChildFragmentManager(),"DialogSelectPlaylist");
+        dialog.show(getFragmentManager(),"DialogSelectPlaylist");
+        dialog.setTargetFragment(SelectPlayList.this,1);
     }
 
     @Override
@@ -102,15 +97,7 @@ public class SelectPlayList extends Fragment implements SelectPlaylistRecyclerAd
     {
         Log.d(TAG, "onPlaylistSelected: Called");
         // send to mainActivity the method to work
-//        mIMainActivity.addSongToPlaylist(songSelected,fragmentsTitles.get(position));
         mIMainActivity.addSongToPlaylistFromSelectFragment(songSelected,fragmentsTitles.get(position));
-//        Log.d(TAG, "onPlaylistSelected: we try to do transaction ");
-////        getFragmentManager().popBackStack();
-//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//        transaction.replace(R.id.main_container,getFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
-//
-//        Log.d(TAG, "onPlaylistSelected: try add song");
-//        mIMainActivity.addSongToPlaylist(songSelected,fragmentsTitles.get(position));
     }
 
     // input from the Dialog
@@ -120,9 +107,9 @@ public class SelectPlayList extends Fragment implements SelectPlaylistRecyclerAd
         Log.d(TAG, "sendInput: Got the input: "+input);
         // send the arguments to main activity
         mIMainActivity.addNewPlaylist(songSelected,input);
-        Log.d(TAG, "sendInput: after addNewplaylistcalled");
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.replace(getId(),getFragmentManager().findFragmentByTag(getString(R.string.fragment_main)));
+        Log.d(TAG, "sendInput: after addNewPlaylistCalled");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_container,getFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
 
     }
 
@@ -144,13 +131,5 @@ public class SelectPlayList extends Fragment implements SelectPlaylistRecyclerAd
         super.onAttach(context);
         mIMainActivity = (IMainActivity) getActivity();
     }
-
-    // should see what we can do
-//    @Override
-//    public void onBackPressed() {
-//        Log.d(TAG, "onBackPressed: called");
-//        setResult(3);
-//        finish();
-//    }
 }
 

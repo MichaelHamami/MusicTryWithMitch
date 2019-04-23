@@ -43,7 +43,7 @@ public class DialogCreateNewPlaylist extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.dialog_new_playlist,container,false);
         mActionCancel = view.findViewById(R.id.action_cancel);
         mActionOk = view.findViewById(R.id.action_ok);
-        mInput = view.findViewById(R.id.dialog_input);
+        mInput = view.findViewById(R.id.dialog_new_playlist_input);
 
         mActionCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,7 +56,7 @@ public class DialogCreateNewPlaylist extends AppCompatDialogFragment {
         mActionOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick:  Ok Clicked : capturing input");
+                Log.d(TAG, "onClick:  Ok Clicked : capturing input: "+mInput.getText().toString());
                 String input = mInput.getText().toString();
                     checkInput(input);
             }
@@ -93,7 +93,6 @@ public class DialogCreateNewPlaylist extends AppCompatDialogFragment {
 
     private boolean isPlaylistAlreadyExists(String input)
     {
-
        return mOnInputListener.isPlaylistExists(input);
     }
 
@@ -102,7 +101,7 @@ public class DialogCreateNewPlaylist extends AppCompatDialogFragment {
         super.onAttach(context);
 
         try{
-            mOnInputListener = (OnInputListener) getActivity();
+            mOnInputListener = (OnInputListener) getTargetFragment();
         }
         catch (ClassCastException e)
         {

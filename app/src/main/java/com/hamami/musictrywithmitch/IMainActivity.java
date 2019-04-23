@@ -1,11 +1,13 @@
 package com.hamami.musictrywithmitch;
 
+import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 
 import com.hamami.musictrywithmitch.Models.Playlist;
 import com.hamami.musictrywithmitch.Models.Songs;
 import com.hamami.musictrywithmitch.util.MyPreferenceManager;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import androidx.viewpager.widget.ViewPager;
@@ -39,7 +41,7 @@ public interface IMainActivity {
     void removeSongFromQueueList(MediaMetadataCompat mediaId);
 
     void removePlaylistFragment(Playlist playlist);
-//    void onFinishedDragInQueueFragment(Playlist playlist, ArrayList<MediaMetadataCompat> medialist);
+
     void onFinishedDragInQueueFragment(ArrayList<MediaMetadataCompat> mediaList);
 
     void shufflePlayingPlaylist();
@@ -50,7 +52,6 @@ public interface IMainActivity {
 
     void addSongToPlaylistFromSelectFragment(Songs song,String playlistTitle);
 
-    void setRootFolder(String rootFolder);
-
+    void setRootFolder(File rootFolder);
 
     }

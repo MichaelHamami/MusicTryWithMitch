@@ -165,10 +165,10 @@ public class MainActivity extends AppCompatActivity implements
                 mPlaylists.clear();
                 mPlaylists.addAll(playlists);
 
-//                if(mPlaylists.size() != viewPagerAdapter.getCount() || mPlaylists.size() == 0 )
-//                {
-//                    addTheFragmentsFromDataBase();
-//                }
+                if(mPlaylists.size() != mViewPagerAdapterActivity.getCount() || mPlaylists.size() == 0 )
+                {
+                    addTheFragmentsFromDataBase();
+                }
             }
         };
         mPlaylistRepository.retrievePlaylistsTask().observe(this,playlistObserver);
@@ -374,25 +374,25 @@ public class MainActivity extends AppCompatActivity implements
     {
         boolean foundTitle = false;
         Log.d(TAG, "addTheFragmentsFromDataBase: We add playlist's  from Database");
-        MainFragment mainFragment = (MainFragment)getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_main));
-        ViewPager viewPagerMain = mainFragment.getViewPager();
-        ViewPagerAdapter viewPagerAdapterMain = (ViewPagerAdapter)viewPagerMain.getAdapter();
+//        MainFragment mainFragment = (MainFragment)getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_main));
+//        ViewPager viewPagerMain = mainFragment.getViewPager();
+//        ViewPagerAdapter viewPagerAdapterMain = (ViewPagerAdapter)viewPagerMain.getAdapter();
         for(int i = 0; i < mPlaylists.size();i++)
         {
-            for(int j=0; j<viewPagerAdapterMain.getFragmentTitles().size(); j++)
+            for(int j=0; j<mViewPagerAdapterActivity.getFragmentTitles().size(); j++)
             {
-                if(mPlaylists.get(i).getTitle().equals(viewPagerAdapterMain.getFragmentTitles().get(j)))
+                if(mPlaylists.get(i).getTitle().equals(mViewPagerAdapterActivity.getFragmentTitles().get(j)))
                 {
                     foundTitle = true;
                 }
             }
             if(foundTitle != true)
             {
-                viewPagerAdapterMain.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
+                mViewPagerAdapterActivity.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
             }
             foundTitle = false;
         }
-        viewPagerAdapterMain.notifyDataSetChanged();
+        mViewPagerAdapterActivity.notifyDataSetChanged();
     }
 
     @Override
@@ -438,8 +438,29 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setRootFolder(String rootFolder) {
+    public void setRootFolder(File rootFolder) {
         Log.d(TAG, "setRootFolder: called new Root is: "+rootFolder);
+        mMyPrefManager.saveLastRootMediaFolder(rootFolder);
+        int positionPlaylist = 0;
+        for (int i= 0;  i<mPlaylists.size(); i++)
+        {
+            if (mPlaylists.get(i).getTitle().equalsIgnoreCase("AllMusic"))
+            {
+                mPlaylists.get(i).getSongs().clear();
+                positionPlaylist = i;
+            }
+        }
+        Playlist playlistFromStorage = retrivePlaylistFromStorage();
+        for (int i= 0;  i<playlistFromStorage.getSongs().size(); i++)
+        {
+            mPlaylists.get(positionPlaylist).getSongs().add(playlistFromStorage.getSongs().get(i));
+        }
+        Log.d(TAG, "setRootFolder: all adds finished");
+        mPlaylistRepository.updatePlaylistTask(mPlaylists.get(positionPlaylist));
+        mViewPagerAdapterActivity.notifyDataSetChanged();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_container,getSupportFragmentManager().findFragmentByTag(getString(R.string.fragment_main))).commit();
+        
     }
 
     private void setupViewPager() {
@@ -450,20 +471,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "setupViewPager: We get playlist's from Database Size is:"+mPlaylists.size());
             for(int i = 0; i < mPlaylists.size();i++)
             {
-//               for(int j=0; j<viewPagerAdapter.getFragmentTitles().size(); j++)
-//               {
-//                   if(mPlaylists.get(i).getTitle().equals(viewPagerAdapter.getFragmentTitles().get(j)))
-//                   {
-//                       foundTitle = true;
-//                   }
-//
-//               }
-//               if(foundTitle != true)
-//               {
-//                   viewPagerAdapter.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
-//                   viewPagerAdapter.notifyDataSetChanged();
-//               }
-//                foundTitle = false;
                 mViewPagerAdapterActivity.addFragment(PlaylistFragment.newInstance(mPlaylists.get(i),true),mPlaylists.get(i).getTitle());
             }
             mViewPagerAdapterActivity.notifyDataSetChanged();
@@ -923,7 +930,15 @@ public class MainActivity extends AppCompatActivity implements
     {
         ArrayList<File> songsFiles = new ArrayList<>();
 //        songsFiles =  findSongs(Environment.getExternalStorageDirectory());
-        songsFiles =  findSongs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
+        if(mMyPrefManager.getLastRootMediaFolder().equals(""))
+        {
+            songsFiles =  findSongs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
+        }
+        else 
+        {
+            songsFiles = findSongs(new File(mMyPrefManager.getLastRootMediaFolder()));
+        }
+        
         ArrayList<Songs> songsList = new ArrayList<>();
         for (int i = 0; i < songsFiles.size(); i++) {
             Songs song = new Songs(

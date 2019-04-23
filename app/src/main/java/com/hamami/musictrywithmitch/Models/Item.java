@@ -3,13 +3,25 @@ package com.hamami.musictrywithmitch.Models;
 
 import android.net.Uri;
 
+import java.io.File;
+
 public class Item {
     private String name;
     private Uri uri;
+    private File file;
 
-    public Item(String name, Uri uri) {
+    public Item(String name, Uri uri,File file) {
         this.name = name;
         this.uri = uri;
+        this.file = file;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public String getName() {

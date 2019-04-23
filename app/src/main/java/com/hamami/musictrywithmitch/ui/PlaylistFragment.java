@@ -66,7 +66,6 @@ public static PlaylistFragment newInstance(Playlist playlist,boolean isPlaylistI
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: called , sizeList:" +songsList.size());
-//        mPlaylistRepository = new PlaylistRepository(getContext());
         if (getArguments() != null){
             Log.d(TAG, "playListFragment, OnCreate: try getArguments! ");
             if (songsList.size() ==0)

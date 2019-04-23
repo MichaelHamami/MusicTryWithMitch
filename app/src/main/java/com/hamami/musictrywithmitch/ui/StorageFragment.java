@@ -62,12 +62,13 @@ public class StorageFragment extends Fragment implements StorageRecyclerAdapter.
     {
         Log.d(TAG, "onViewCreated: called ");
         File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+        mDataset.add(new Item(root.getName(),Uri.fromFile(root),root));
         File[] files = root.listFiles();
         for(File singleFile : files)
         {
             if(!singleFile.isHidden())
             {
-                mDataset.add(new Item(singleFile.getName(), Uri.fromFile(singleFile)));
+                mDataset.add(new Item(singleFile.getName(), Uri.fromFile(singleFile),singleFile));
             }
         }
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -104,7 +105,7 @@ public class StorageFragment extends Fragment implements StorageRecyclerAdapter.
                 switch (item.getItemId()) {
                     case R.id.setAsRoot:
                         Log.d(TAG, "onMenuItemClick: set as root menu clicked ");
-                        mIMainActivity.setRootFolder(itemStorage.getName());
+                        mIMainActivity.setRootFolder(itemStorage.getFile());
                         return true;
                     default:
                         return false;

@@ -106,12 +106,13 @@ public class StorageRecyclerAdapter extends RecyclerView.Adapter<StorageRecycler
                 {
                     Log.d(TAG, "onClick: clear items and try to get them again");
                     itemList.clear();
+                    itemList.add(new Item(file.getName(),Uri.fromFile(file),file));
                     File[] files = file.listFiles();
                     for(File singleFile : files)
                     {
                         if(!singleFile.isHidden())
                         {
-                            itemList.add(new Item(singleFile.getName(), Uri.fromFile(singleFile)));
+                            itemList.add(new Item(singleFile.getName(), Uri.fromFile(singleFile),singleFile));
                         }
                     }
                     notifyDataSetChanged();
