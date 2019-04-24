@@ -58,6 +58,13 @@ dependencies {
     androidTestImplementation 'android.arch.persistence.room:testing:1.1.1'
     // convert object from room to string
     implementation 'com.google.code.gson:gson:2.8.2'
+    //Fire base
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-firestore:18.2.0'
+
+
+
+    // Jar Files
 //    implementation files('C:/Hamami/Learn Programing/Android Studio/MusicTryWithMitch/libs/mail.jar')
 //    implementation files('C:/Hamami/Learn Programing/Android Studio/MusicTryWithMitch/libs/additionnal.jar')
 //    implementation files('C:/Hamami/Learn Programing/Android Studio/MusicTryWithMitch/libs/activation.jar')
@@ -65,3 +72,5 @@ dependencies {
     implementation files('A:/Michael/Learn Programing/Android Studio/TheMusicApp/libs/additionnal.jar')
     implementation files('A:/Michael/Learn Programing/Android Studio/TheMusicApp/libs/mail.jar')
 }
+
+apply plugin: 'com.google.gms.google-services'

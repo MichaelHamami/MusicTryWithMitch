@@ -53,6 +53,7 @@ import com.hamami.musictrywithmitch.services.MediaService;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelper;
 import com.hamami.musictrywithmitch.client.MediaBrowserHelperCallback;
 import com.hamami.musictrywithmitch.ui.AboutFragment;
+import com.hamami.musictrywithmitch.ui.InformationFromDeveloperFragment;
 import com.hamami.musictrywithmitch.ui.MainFragment;
 import com.hamami.musictrywithmitch.ui.MediaControllerFragment;
 import com.hamami.musictrywithmitch.ui.PlaylistFragment;
@@ -76,7 +77,7 @@ import static com.hamami.musictrywithmitch.util.Constants.ALL_MUSIC_FRAGMENT_TIT
 import static com.hamami.musictrywithmitch.util.Constants.QUEUE_FRAGMENT_TITLE;
 
 public class MainActivity extends AppCompatActivity implements
-        IMainActivity, NavigationView.OnNavigationItemSelectedListener,
+        IMainActivity,
         MediaBrowserHelperCallback {
     // Tag for debug
     private static final String TAG = "MainActivity";
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements
     private Songs songToAdd;
 
       // vars
-
       private MediaBrowserHelper mMediaBrowserHelper;
       private MyApplication mMyApplication;
       private MyPreferenceManager mMyPrefManager;
@@ -125,10 +125,6 @@ public class MainActivity extends AppCompatActivity implements
       // Repository object
       private PlaylistRepository mPlaylistRepository;
       private ArrayList<Playlist> mPlaylists;
-      private Button button;
-
-//    public MainActivity() {
-//    }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -277,25 +273,25 @@ public class MainActivity extends AppCompatActivity implements
                 if(selectedItem.equalsIgnoreCase("Report to Developer"))
                 {
                     Log.d(TAG, "onChildClick: we try to openDialog");
-//                    Dialog dialog = new Dialog(context, android.R.style.Theme_Light);
-//                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-//                    dialog.setContentView(R.layout.MyCustomDialogLayout);
-//                    dialog.show();
                     DialogReportToDeveloper dialog = new DialogReportToDeveloper();
                     dialog.show(getSupportFragmentManager(),"DialogReportToDeveloper");
-//                    new SendMailAsyncTask("the body style","the subject style? really?").execute();
 
                 }
                 else if(selectedItem.equalsIgnoreCase("about"))
                 {
                     // todo people can stack it how many they want.....
-                    Log.d(TAG, "onChildClick: click on about we do transaction");
+                    Log.d(TAG, "onChildClick: click on about");
                     doFragmentTransaction(new AboutFragment(),"about",true);
                 }
                 else if(selectedItem.equalsIgnoreCase("Change Music Folder"))
                 {
                     Log.d(TAG, "onChildClick: click on Change Music Folder");
                     doFragmentTransaction(new StorageFragment(),"storage",true);
+                }
+                else if(selectedItem.equalsIgnoreCase("info"))
+                {
+                    Log.d(TAG, "onChildClick: click on info");
+                    doFragmentTransaction(new InformationFromDeveloperFragment(),"info",true);
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 return false;
@@ -346,31 +342,6 @@ public class MainActivity extends AppCompatActivity implements
             super.onBackPressed();
         }
     }
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
     private void addTheFragmentsFromDataBase()
     {
         boolean foundTitle = false;
@@ -582,7 +553,6 @@ public class MainActivity extends AppCompatActivity implements
         {
             mMediaBrowserHelper.getTransportControls().setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL);
         }
-
     }
 
     @Override
